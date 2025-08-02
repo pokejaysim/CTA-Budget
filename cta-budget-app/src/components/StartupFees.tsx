@@ -13,73 +13,102 @@ const StartupFees: React.FC<StartupFeesProps> = ({ fees, onChange }) => {
   };
 
   return (
-    <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300">
-      <div className="flex items-center mb-6">
-        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center mr-4">
-          <span className="text-white font-bold text-lg">💰</span>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      {/* Card Header */}
+      <div className="px-6 py-4 bg-blue-50 border-b border-blue-100">
+        <div className="flex items-center">
+          <div className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+            <span className="text-white text-sm font-semibold">💰</span>
+          </div>
+          <div className="ml-3">
+            <h3 className="text-lg font-semibold text-gray-900">Startup Fees</h3>
+            <p className="text-sm text-gray-600">Initial study setup costs</p>
+          </div>
         </div>
-        <h2 className="text-2xl font-bold text-slate-800">Startup Fees</h2>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            IRB Fee ($)
-          </label>
-          <input
-            type="number"
-            value={fees.irbFee || ''}
-            onChange={(e) => handleChange('irbFee', e.target.value)}
-            className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-200 hover:border-slate-300"
-            placeholder="0"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            Ethics Fee ($)
-          </label>
-          <input
-            type="number"
-            value={fees.ethicsFee || ''}
-            onChange={(e) => handleChange('ethicsFee', e.target.value)}
-            className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-200 hover:border-slate-300"
-            placeholder="0"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            Archiving Fee ($)
-          </label>
-          <input
-            type="number"
-            value={fees.archivingFee || ''}
-            onChange={(e) => handleChange('archivingFee', e.target.value)}
-            className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-200 hover:border-slate-300"
-            placeholder="0"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            Pharmacy Fee ($)
-          </label>
-          <input
-            type="number"
-            value={fees.pharmacyFee || ''}
-            onChange={(e) => handleChange('pharmacyFee', e.target.value)}
-            className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-200 hover:border-slate-300"
-            placeholder="0"
-          />
-        </div>
-        <div className="md:col-span-2">
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            Other Fees ($)
-          </label>
-          <input
-            type="number"
-            value={fees.other || ''}
-            onChange={(e) => handleChange('other', e.target.value)}
-            className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-200 hover:border-slate-300"
-            placeholder="0"
-          />
+
+      {/* Card Content */}
+      <div className="p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              IRB Fee
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
+              <input
+                type="number"
+                value={fees.irbFee || ''}
+                onChange={(e) => handleChange('irbFee', e.target.value)}
+                className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              Ethics Fee
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
+              <input
+                type="number"
+                value={fees.ethicsFee || ''}
+                onChange={(e) => handleChange('ethicsFee', e.target.value)}
+                className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              Archiving Fee
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
+              <input
+                type="number"
+                value={fees.archivingFee || ''}
+                onChange={(e) => handleChange('archivingFee', e.target.value)}
+                className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              Pharmacy Fee
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
+              <input
+                type="number"
+                value={fees.pharmacyFee || ''}
+                onChange={(e) => handleChange('pharmacyFee', e.target.value)}
+                className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div className="sm:col-span-2 space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              Other Fees
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
+              <input
+                type="number"
+                value={fees.other || ''}
+                onChange={(e) => handleChange('other', e.target.value)}
+                className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
+                placeholder="0"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

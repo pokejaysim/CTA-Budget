@@ -49,27 +49,33 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <header className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 text-white shadow-2xl">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex flex-col lg:flex-row justify-between items-center">
-            <div className="mb-6 lg:mb-0">
-              <h1 className="text-3xl lg:text-4xl font-bold mb-2 tracking-tight">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
+      {/* Header Card */}
+      <div className="bg-white shadow-lg border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-6 lg:space-y-0">
+            {/* Title Section */}
+            <div className="space-y-2">
+              <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
                 Clinical Trial Budget Forecaster
               </h1>
-              <p className="text-blue-100 text-lg">
-                Professional budget planning for clinical trials
+              <p className="text-lg text-gray-600 font-medium">
+                Professional budget planning and forecasting for clinical trials
               </p>
             </div>
-            <div className="flex gap-4">
+            
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleExport}
-                className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all duration-200 font-medium border border-white/20 shadow-lg hover:shadow-xl hover:scale-105"
+                className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-md hover:shadow-lg transition-all duration-200"
               >
-                📤 Export JSON
+                <span className="mr-2">📤</span>
+                Export Data
               </button>
-              <label className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all duration-200 font-medium cursor-pointer border border-white/20 shadow-lg hover:shadow-xl hover:scale-105">
-                📥 Import JSON
+              <label className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer">
+                <span className="mr-2">📥</span>
+                Import Data
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -81,12 +87,14 @@ function App() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* Left Column */}
-          <div className="space-y-8">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Input Cards Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Left Column - Input Cards */}
+          <div className="space-y-6">
             <StartupFees
               fees={budgetData.startupFees}
               onChange={(fees) => updateBudgetData('startupFees', fees)}
@@ -101,8 +109,8 @@ function App() {
             />
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-8">
+          {/* Right Column - Configuration Cards */}
+          <div className="space-y-6">
             <TargetEnrollment
               enrollment={budgetData.targetEnrollment}
               onChange={(enrollment) => updateBudgetData('targetEnrollment', enrollment)}
@@ -118,8 +126,8 @@ function App() {
           </div>
         </div>
 
-        {/* Full Width Components */}
-        <div className="mt-12 space-y-8">
+        {/* Results Section */}
+        <div className="space-y-6">
           <ForecastSummary budgetData={budgetData} />
           <NotesSection
             notes={budgetData.notes}
@@ -128,9 +136,10 @@ function App() {
         </div>
       </main>
 
-      <footer className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-8 mt-16">
-        <div className="container mx-auto px-6 text-center">
-          <p className="text-slate-300">
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <p className="text-center text-sm text-gray-500">
             Built with ❤️ by Jason Sim, Clinical Trial Budget Specialist | Vancouver, BC 🇨🇦
           </p>
         </div>
