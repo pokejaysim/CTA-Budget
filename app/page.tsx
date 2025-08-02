@@ -11,9 +11,11 @@ import {
   Download,
   Upload,
   Plus,
-  Trash2
+  Trash2,
+  Edit3,
+  Building2
 } from 'lucide-react';
-import type { BudgetData, Visit, CustomRevenueItem, PersonnelCost } from '@/types/budget';
+import type { BudgetData, Visit, CustomRevenueItem, PersonnelReimbursement, StartupFeeItem } from '@/types/budget';
 import { loadBudgetData, saveBudgetData, exportBudgetData, importBudgetData } from '@/lib/storage';
 
 export default function Home() {
@@ -28,7 +30,7 @@ export default function Home() {
   };
 
   // Calculate totals
-  const totalStartupFees = Object.values(budgetData.startupFees).reduce((sum, fee) => sum + fee, 0);
+  const totalStartupFees = budgetData.startupFees.reduce((sum, fee) => sum + fee.amount, 0);
   const totalVisitRevenue = budgetData.visits.reduce((sum, visit) => sum + (visit.paymentPerVisit * budgetData.targetEnrollment), 0);
   const totalCustomRevenue = budgetData.customRevenueItems.reduce((sum, item) => {
     if (item.type === 'flat') return sum + item.amount;
@@ -36,7 +38,7 @@ export default function Home() {
     if (item.type === 'perVisit') return sum + (item.amount * budgetData.visits.length * budgetData.targetEnrollment);
     return sum;
   }, 0);
-  const totalPersonnelCosts = budgetData.personnelCosts.reduce((sum, cost) => {
+  const totalPersonnelReimbursements = budgetData.personnelReimbursements.reduce((sum, cost) => {
     if (cost.type === 'perPatient' && cost.hourlyRate && cost.hours) {
       return sum + (cost.hourlyRate * cost.hours * budgetData.targetEnrollment);
     }
@@ -46,18 +48,18 @@ export default function Home() {
     return sum;
   }, 0);
   
-  const subtotal = totalStartupFees + totalVisitRevenue + totalCustomRevenue;
+  const subtotal = totalStartupFees + totalVisitRevenue + totalCustomRevenue + totalPersonnelReimbursements;
   const overheadAmount = subtotal * (budgetData.overhead / 100);
   const totalRevenue = subtotal + overheadAmount;
-  const netProfit = totalRevenue - totalPersonnelCosts;
 
   // Calculate completion percentage
   const completionPercentage = Math.min(100, (
-    (budgetData.targetEnrollment > 0 ? 20 : 0) +
-    (budgetData.visits.length > 0 ? 20 : 0) +
-    (budgetData.customRevenueItems.length > 0 ? 20 : 0) +
-    (budgetData.personnelCosts.length > 0 ? 20 : 0) +
-    (Object.values(budgetData.startupFees).some(fee => fee > 0) ? 20 : 0)
+    (budgetData.targetEnrollment > 0 ? 15 : 0) +
+    (budgetData.visits.length > 0 ? 15 : 0) +
+    (budgetData.customRevenueItems.length > 0 ? 15 : 0) +
+    (budgetData.personnelReimbursements.length > 0 ? 15 : 0) +
+    (budgetData.startupFees.some(fee => fee.amount > 0) ? 15 : 0) +
+    (budgetData.studyInfo.protocolNumber ? 25 : 0)
   ));
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +74,31 @@ export default function Home() {
     }
   };
 
+  // Startup Fee functions
+  const addStartupFee = () => {
+    const newFee: StartupFeeItem = {
+      id: Date.now().toString(),
+      name: 'New Startup Fee',
+      amount: 0
+    };
+    updateBudgetData({ startupFees: [...budgetData.startupFees, newFee] });
+  };
+
+  const updateStartupFee = (id: string, updates: Partial<StartupFeeItem>) => {
+    updateBudgetData({
+      startupFees: budgetData.startupFees.map(fee => 
+        fee.id === id ? { ...fee, ...updates } : fee
+      )
+    });
+  };
+
+  const deleteStartupFee = (id: string) => {
+    updateBudgetData({ 
+      startupFees: budgetData.startupFees.filter(fee => fee.id !== id) 
+    });
+  };
+
+  // Visit functions
   const addVisit = () => {
     const newVisit: Visit = {
       id: Date.now().toString(),
@@ -91,6 +118,7 @@ export default function Home() {
     updateBudgetData({ visits: budgetData.visits.filter(v => v.id !== id) });
   };
 
+  // Custom Revenue functions
   const addCustomRevenueItem = () => {
     const newItem: CustomRevenueItem = {
       id: Date.now().toString(),
@@ -115,28 +143,29 @@ export default function Home() {
     });
   };
 
-  const addPersonnelCost = () => {
-    const newCost: PersonnelCost = {
+  // Personnel Reimbursement functions
+  const addPersonnelReimbursement = () => {
+    const newReimbursement: PersonnelReimbursement = {
       id: Date.now().toString(),
-      role: 'New Role',
+      role: 'Study Coordinator Fee',
       type: 'perPatient',
       hourlyRate: 0,
       hours: 0
     };
-    updateBudgetData({ personnelCosts: [...budgetData.personnelCosts, newCost] });
+    updateBudgetData({ personnelReimbursements: [...budgetData.personnelReimbursements, newReimbursement] });
   };
 
-  const updatePersonnelCost = (id: string, updates: Partial<PersonnelCost>) => {
+  const updatePersonnelReimbursement = (id: string, updates: Partial<PersonnelReimbursement>) => {
     updateBudgetData({
-      personnelCosts: budgetData.personnelCosts.map(cost => 
+      personnelReimbursements: budgetData.personnelReimbursements.map(cost => 
         cost.id === id ? { ...cost, ...updates } : cost
       )
     });
   };
 
-  const deletePersonnelCost = (id: string) => {
+  const deletePersonnelReimbursement = (id: string) => {
     updateBudgetData({ 
-      personnelCosts: budgetData.personnelCosts.filter(cost => cost.id !== id) 
+      personnelReimbursements: budgetData.personnelReimbursements.filter(cost => cost.id !== id) 
     });
   };
 
@@ -169,7 +198,24 @@ export default function Home() {
       <div className="space-y-3">
         {items.map((item, index) => (
           <div key={item.id || index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-            {category === 'visits' ? (
+            {category === 'startupFees' ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="Fee Name"
+                  value={item.name}
+                  onChange={(e) => onUpdate(item.id, { name: e.target.value })}
+                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+                />
+                <input
+                  type="number"
+                  placeholder="Amount"
+                  value={item.amount}
+                  onChange={(e) => onUpdate(item.id, { amount: Number(e.target.value) })}
+                  className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+                />
+              </>
+            ) : category === 'visits' ? (
               <>
                 <input
                   type="text"
@@ -212,11 +258,11 @@ export default function Home() {
                   className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                 />
               </>
-            ) : category === 'personnel' ? (
+            ) : category === 'personnelReimbursements' ? (
               <>
                 <input
                   type="text"
-                  placeholder="Role"
+                  placeholder="Role (e.g., Study Coordinator Fee)"
                   value={item.role}
                   onChange={(e) => onUpdate(item.id, { role: e.target.value })}
                   className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
@@ -340,13 +386,97 @@ export default function Home() {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="xl:col-span-2 space-y-8">
-            {/* Study Information */}
+            {/* Study Information Header */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Building2 className="w-5 h-5 text-blue-700" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Study Information</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Protocol Number</label>
+                  <input
+                    type="text"
+                    value={budgetData.studyInfo.protocolNumber}
+                    onChange={(e) => updateBudgetData({ 
+                      studyInfo: { ...budgetData.studyInfo, protocolNumber: e.target.value }
+                    })}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                    placeholder="e.g., PROTO-2024-001"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Study Title</label>
+                  <input
+                    type="text"
+                    value={budgetData.studyInfo.studyTitle}
+                    onChange={(e) => updateBudgetData({ 
+                      studyInfo: { ...budgetData.studyInfo, studyTitle: e.target.value }
+                    })}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                    placeholder="Study title"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Principal Investigator</label>
+                  <input
+                    type="text"
+                    value={budgetData.studyInfo.piName}
+                    onChange={(e) => updateBudgetData({ 
+                      studyInfo: { ...budgetData.studyInfo, piName: e.target.value }
+                    })}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                    placeholder="PI Name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Study Date</label>
+                  <input
+                    type="date"
+                    value={budgetData.studyInfo.studyDate}
+                    onChange={(e) => updateBudgetData({ 
+                      studyInfo: { ...budgetData.studyInfo, studyDate: e.target.value }
+                    })}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Sponsor</label>
+                  <input
+                    type="text"
+                    value={budgetData.studyInfo.sponsor}
+                    onChange={(e) => updateBudgetData({ 
+                      studyInfo: { ...budgetData.studyInfo, sponsor: e.target.value }
+                    })}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                    placeholder="Sponsor name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Site Name</label>
+                  <input
+                    type="text"
+                    value={budgetData.studyInfo.siteName}
+                    onChange={(e) => updateBudgetData({ 
+                      studyInfo: { ...budgetData.studyInfo, siteName: e.target.value }
+                    })}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                    placeholder="Site name"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Target Enrollment & Overhead */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-gray-100 rounded-lg">
-                  <FileText className="w-5 h-5 text-gray-700" />
+                  <Users className="w-5 h-5 text-gray-700" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">Study Information</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Study Parameters</h2>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -376,36 +506,17 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Startup Fees */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <DollarSign className="w-5 h-5 text-gray-700" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900">Startup Fees</h2>
-              </div>
-              
-              <div className="space-y-4">
-                {Object.entries(budgetData.startupFees).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <label className="text-gray-700 font-medium capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
-                    </label>
-                    <input
-                      type="number"
-                      value={value}
-                      onChange={(e) => updateBudgetData({
-                        startupFees: { ...budgetData.startupFees, [key]: Number(e.target.value) }
-                      })}
-                      className="w-32 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                      placeholder="Amount"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Cost Sections */}
+            <CostSection 
+              title="Startup Fees" 
+              category="startupFees"
+              items={budgetData.startupFees}
+              onAdd={addStartupFee}
+              onUpdate={updateStartupFee}
+              onDelete={deleteStartupFee}
+              icon={DollarSign}
+            />
+            
             <CostSection 
               title="Visit Schedule" 
               category="visits"
@@ -427,12 +538,12 @@ export default function Home() {
             />
             
             <CostSection 
-              title="Personnel Costs" 
-              category="personnel"
-              items={budgetData.personnelCosts}
-              onAdd={addPersonnelCost}
-              onUpdate={updatePersonnelCost}
-              onDelete={deletePersonnelCost}
+              title="Personnel Reimbursement Requests" 
+              category="personnelReimbursements"
+              items={budgetData.personnelReimbursements}
+              onAdd={addPersonnelReimbursement}
+              onUpdate={updatePersonnelReimbursement}
+              onDelete={deletePersonnelReimbursement}
               icon={Users}
             />
 
@@ -472,6 +583,10 @@ export default function Home() {
                   <span className="text-gray-600">Custom Revenue</span>
                   <span className="font-semibold text-gray-900">${totalCustomRevenue.toLocaleString()}</span>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Personnel Reimbursements</span>
+                  <span className="font-semibold text-gray-900">${totalPersonnelReimbursements.toLocaleString()}</span>
+                </div>
                 <hr className="border-gray-200" />
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Subtotal</span>
@@ -483,27 +598,14 @@ export default function Home() {
                 </div>
                 <hr className="border-gray-200" />
                 <div className="flex justify-between items-center text-lg bg-blue-50 p-3 rounded-lg">
-                  <span className="font-semibold text-gray-900">Total Revenue</span>
+                  <span className="font-semibold text-gray-900">Total Budget Request</span>
                   <span className="font-bold text-gray-900">${totalRevenue.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Personnel Costs</span>
-                  <span className="font-semibold text-red-600">-${totalPersonnelCosts.toLocaleString()}</span>
-                </div>
-                <hr className="border-gray-200" />
-                <div className={`flex justify-between items-center text-lg p-3 rounded-lg ${
-                  netProfit >= 0 ? 'bg-green-50' : 'bg-red-50'
-                }`}>
-                  <span className="font-semibold text-gray-900">Net Profit</span>
-                  <span className={`font-bold ${netProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                    ${netProfit.toLocaleString()}
-                  </span>
                 </div>
                 
                 {budgetData.targetEnrollment > 0 && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Revenue Per Patient</span>
+                      <span className="text-gray-600">Budget Per Patient</span>
                       <span className="font-semibold text-gray-900">
                         ${(totalRevenue / budgetData.targetEnrollment).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
@@ -518,9 +620,15 @@ export default function Home() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total Items</span>
+                  <span className="text-gray-600">Protocol</span>
                   <span className="font-medium text-gray-900">
-                    {budgetData.visits.length + budgetData.customRevenueItems.length + budgetData.personnelCosts.length}
+                    {budgetData.studyInfo.protocolNumber || 'Not set'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Line Items</span>
+                  <span className="font-medium text-gray-900">
+                    {budgetData.visits.length + budgetData.customRevenueItems.length + budgetData.personnelReimbursements.length + budgetData.startupFees.length}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -528,12 +636,12 @@ export default function Home() {
                   <span className="font-medium text-gray-900">{budgetData.visits.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Patients</span>
+                  <span className="text-gray-600">Target Patients</span>
                   <span className="font-medium text-gray-900">{budgetData.targetEnrollment}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Personnel</span>
-                  <span className="font-medium text-gray-900">{budgetData.personnelCosts.length}</span>
+                  <span className="text-gray-600">Personnel Items</span>
+                  <span className="font-medium text-gray-900">{budgetData.personnelReimbursements.length}</span>
                 </div>
               </div>
             </div>

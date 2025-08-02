@@ -1,9 +1,16 @@
-export interface StartupFees {
-  irbFee: number;
-  ethicsFee: number;
-  archivingFee: number;
-  pharmacyFee: number;
-  other: number;
+export interface StartupFeeItem {
+  id: string;
+  name: string;
+  amount: number;
+}
+
+export interface StudyInfo {
+  protocolNumber: string;
+  studyTitle: string;
+  piName: string;
+  studyDate: string;
+  sponsor: string;
+  siteName: string;
 }
 
 export interface Visit {
@@ -19,7 +26,7 @@ export interface CustomRevenueItem {
   type: 'flat' | 'perPatient' | 'perVisit';
 }
 
-export interface PersonnelCost {
+export interface PersonnelReimbursement {
   id: string;
   role: string;
   type: 'perPatient' | 'flatMonthly';
@@ -30,11 +37,12 @@ export interface PersonnelCost {
 }
 
 export interface BudgetData {
-  startupFees: StartupFees;
+  studyInfo: StudyInfo;
+  startupFees: StartupFeeItem[];
   visits: Visit[];
   overhead: number;
   customRevenueItems: CustomRevenueItem[];
   targetEnrollment: number;
-  personnelCosts: PersonnelCost[];
+  personnelReimbursements: PersonnelReimbursement[];
   notes: string;
 }

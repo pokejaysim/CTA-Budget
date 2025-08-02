@@ -3,18 +3,25 @@ import { BudgetData } from '@/types/budget';
 const STORAGE_KEY = 'ctaBudget';
 
 const defaultBudgetData: BudgetData = {
-  startupFees: {
-    irbFee: 0,
-    ethicsFee: 0,
-    archivingFee: 0,
-    pharmacyFee: 0,
-    other: 0,
+  studyInfo: {
+    protocolNumber: '',
+    studyTitle: '',
+    piName: '',
+    studyDate: '',
+    sponsor: '',
+    siteName: '',
   },
+  startupFees: [
+    { id: '1', name: 'IRB Fee', amount: 0 },
+    { id: '2', name: 'Ethics Committee Fee', amount: 0 },
+    { id: '3', name: 'Archiving Fee', amount: 0 },
+    { id: '4', name: 'Pharmacy Fee', amount: 0 },
+  ],
   visits: [],
   overhead: 30,
   customRevenueItems: [],
   targetEnrollment: 0,
-  personnelCosts: [],
+  personnelReimbursements: [],
   notes: '',
 };
 
