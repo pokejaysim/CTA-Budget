@@ -142,12 +142,19 @@ const ForecastSummary: React.FC<ForecastSummaryProps> = ({ budgetData }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">Forecast Summary</h2>
+    <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300">
+      <div className="flex items-center mb-8">
+        <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center mr-4">
+          <span className="text-white font-bold text-xl">📊</span>
+        </div>
+        <h2 className="text-3xl font-bold text-slate-800">Forecast Summary</h2>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="space-y-3">
-          <h3 className="font-medium text-gray-700">Revenue Breakdown</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+          <h3 className="font-bold text-green-800 text-lg mb-4 flex items-center">
+            💰 Revenue Breakdown
+          </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Startup Fees:</span>
@@ -172,8 +179,10 @@ const ForecastSummary: React.FC<ForecastSummaryProps> = ({ budgetData }) => {
           </div>
         </div>
 
-        <div className="space-y-3">
-          <h3 className="font-medium text-gray-700">Cost & Margin</h3>
+        <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6 border border-red-200">
+          <h3 className="font-bold text-red-800 text-lg mb-4 flex items-center">
+            📈 Cost & Margin
+          </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Personnel Cost:</span>

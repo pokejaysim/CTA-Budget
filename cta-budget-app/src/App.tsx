@@ -49,22 +49,27 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-blue-600 text-white shadow-lg">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center">
-            <h1 className="text-2xl md:text-3xl font-bold mb-4 sm:mb-0">
-              Clinical Trial Budget Forecaster
-            </h1>
-            <div className="flex gap-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <header className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 text-white shadow-2xl">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex flex-col lg:flex-row justify-between items-center">
+            <div className="mb-6 lg:mb-0">
+              <h1 className="text-3xl lg:text-4xl font-bold mb-2 tracking-tight">
+                Clinical Trial Budget Forecaster
+              </h1>
+              <p className="text-blue-100 text-lg">
+                Professional budget planning for clinical trials
+              </p>
+            </div>
+            <div className="flex gap-4">
               <button
                 onClick={handleExport}
-                className="px-4 py-2 bg-white text-blue-600 rounded-md hover:bg-gray-100 transition-colors font-medium"
+                className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all duration-200 font-medium border border-white/20 shadow-lg hover:shadow-xl hover:scale-105"
               >
-                Export JSON
+                📤 Export JSON
               </button>
-              <label className="px-4 py-2 bg-white text-blue-600 rounded-md hover:bg-gray-100 transition-colors font-medium cursor-pointer">
-                Import JSON
+              <label className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all duration-200 font-medium cursor-pointer border border-white/20 shadow-lg hover:shadow-xl hover:scale-105">
+                📥 Import JSON
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -78,10 +83,10 @@ function App() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <main className="container mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {/* Left Column */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <StartupFees
               fees={budgetData.startupFees}
               onChange={(fees) => updateBudgetData('startupFees', fees)}
@@ -97,7 +102,7 @@ function App() {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <TargetEnrollment
               enrollment={budgetData.targetEnrollment}
               onChange={(enrollment) => updateBudgetData('targetEnrollment', enrollment)}
@@ -114,7 +119,7 @@ function App() {
         </div>
 
         {/* Full Width Components */}
-        <div className="mt-6 space-y-6">
+        <div className="mt-12 space-y-8">
           <ForecastSummary budgetData={budgetData} />
           <NotesSection
             notes={budgetData.notes}
@@ -123,10 +128,10 @@ function App() {
         </div>
       </main>
 
-      <footer className="bg-gray-800 text-white py-6 mt-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm">
-            Built by Jason Sim, Clinical Trial Budget Specialist | Vancouver, BC 🇨🇦
+      <footer className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-8 mt-16">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-slate-300">
+            Built with ❤️ by Jason Sim, Clinical Trial Budget Specialist | Vancouver, BC 🇨🇦
           </p>
         </div>
       </footer>
