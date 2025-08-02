@@ -63,6 +63,7 @@ const CostSection = ({ title, items, onAdd, onUpdate, onDelete, icon: Icon, cate
                 placeholder="Amount"
                 value={item.amount}
                 onChange={(e) => onUpdate(item.id, { amount: Number(e.target.value) })}
+                onFocus={(e) => e.target.select()}
                 className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
               />
             </>
@@ -80,6 +81,7 @@ const CostSection = ({ title, items, onAdd, onUpdate, onDelete, icon: Icon, cate
                 placeholder="Payment"
                 value={item.paymentPerVisit}
                 onChange={(e) => onUpdate(item.id, { paymentPerVisit: Number(e.target.value) })}
+                onFocus={(e) => e.target.select()}
                 className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
               />
             </>
@@ -106,6 +108,7 @@ const CostSection = ({ title, items, onAdd, onUpdate, onDelete, icon: Icon, cate
                 placeholder="Amount"
                 value={item.amount}
                 onChange={(e) => onUpdate(item.id, { amount: Number(e.target.value) })}
+                onFocus={(e) => e.target.select()}
                 className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
               />
             </>
@@ -139,6 +142,7 @@ const CostSection = ({ title, items, onAdd, onUpdate, onDelete, icon: Icon, cate
                     placeholder="Rate"
                     value={item.hourlyRate || 0}
                     onChange={(e) => onUpdate(item.id, { hourlyRate: Number(e.target.value) })}
+                    onFocus={(e) => e.target.select()}
                     className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                   />
                   <input
@@ -146,6 +150,7 @@ const CostSection = ({ title, items, onAdd, onUpdate, onDelete, icon: Icon, cate
                     placeholder="Hours"
                     value={item.hours || 0}
                     onChange={(e) => onUpdate(item.id, { hours: Number(e.target.value) })}
+                    onFocus={(e) => e.target.select()}
                     className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                   />
                 </>
@@ -156,6 +161,7 @@ const CostSection = ({ title, items, onAdd, onUpdate, onDelete, icon: Icon, cate
                     placeholder="Monthly"
                     value={item.monthlyFee || 0}
                     onChange={(e) => onUpdate(item.id, { monthlyFee: Number(e.target.value) })}
+                    onFocus={(e) => e.target.select()}
                     className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                   />
                   <input
@@ -163,6 +169,7 @@ const CostSection = ({ title, items, onAdd, onUpdate, onDelete, icon: Icon, cate
                     placeholder="Months"
                     value={item.months || 0}
                     onChange={(e) => onUpdate(item.id, { months: Number(e.target.value) })}
+                    onFocus={(e) => e.target.select()}
                     className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                   />
                 </>
@@ -568,6 +575,7 @@ export default function Home() {
                     type="number"
                     value={budgetData.targetEnrollment}
                     onChange={(e) => updateBudgetData({ targetEnrollment: Number(e.target.value) })}
+                    onFocus={(e) => e.target.select()}
                     className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                     placeholder="Number of patients"
                     min="1"
@@ -579,6 +587,7 @@ export default function Home() {
                     type="number"
                     value={budgetData.overhead}
                     onChange={(e) => updateBudgetData({ overhead: Number(e.target.value) })}
+                    onFocus={(e) => e.target.select()}
                     className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                     placeholder="Overhead %"
                     min="0"
