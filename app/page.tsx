@@ -13,7 +13,8 @@ import {
   Plus,
   Trash2,
   Building2,
-  Save
+  Save,
+  RotateCcw
 } from 'lucide-react';
 import type { BudgetData, Visit, CustomRevenueItem, PersonnelReimbursement, StartupFeeItem } from '@/types/budget';
 import { loadBudgetData, saveBudgetData, exportBudgetData, importBudgetData } from '@/lib/storage';
@@ -217,6 +218,7 @@ export default function Home() {
     return loadBudgetData();
   });
   const [isClient, setIsClient] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -229,6 +231,18 @@ export default function Home() {
       saveBudgetData(budgetData);
     }
   }, [budgetData, isClient]);
+
+  // Handle Escape key for modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showClearConfirm) {
+        setShowClearConfirm(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showClearConfirm]);
 
   const updateBudgetData = (updates: Partial<BudgetData>) => {
     setBudgetData(prev => ({ ...prev, ...updates }));
@@ -271,6 +285,41 @@ export default function Home() {
 
   const handleSave = () => {
     exportBudgetData(budgetData);
+  };
+
+  const handleClearAll = () => {
+    setShowClearConfirm(true);
+  };
+
+  const confirmClearAll = () => {
+    const defaultData: BudgetData = {
+      studyInfo: {
+        protocolNumber: '',
+        studyTitle: '',
+        piName: '',
+        studyDate: '',
+        sponsor: '',
+        siteName: '',
+      },
+      startupFees: [
+        { id: '1', name: 'IRB Fee', amount: 0 },
+        { id: '2', name: 'Ethics Committee Fee', amount: 0 },
+        { id: '3', name: 'Archiving Fee', amount: 0 },
+        { id: '4', name: 'Pharmacy Fee', amount: 0 },
+      ],
+      visits: [],
+      overhead: 30,
+      customRevenueItems: [],
+      targetEnrollment: 0,
+      personnelReimbursements: [],
+      notes: '',
+    };
+    setBudgetData(defaultData);
+    setShowClearConfirm(false);
+  };
+
+  const cancelClearAll = () => {
+    setShowClearConfirm(false);
   };
 
   // Startup Fee functions
@@ -403,6 +452,13 @@ export default function Home() {
                 Import
                 <input type="file" accept=".json" onChange={handleImport} className="hidden" />
               </label>
+              <button
+                onClick={handleClearAll}
+                className="flex items-center gap-2 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium border border-red-300"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Clear All
+              </button>
             </div>
           </div>
         </div>
@@ -674,6 +730,40 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Clear All Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <RotateCcw className="w-5 h-5 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Clear All Budget Data</h3>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to clear all budget data? This will delete all study information, 
+              cost items, and reset everything to the initial state. This action cannot be undone.
+            </p>
+            
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={cancelClearAll}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmClearAll}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+              >
+                Clear All Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
