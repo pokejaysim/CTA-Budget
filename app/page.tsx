@@ -18,11 +18,47 @@ import type { BudgetData, Visit, CustomRevenueItem, PersonnelReimbursement, Star
 import { loadBudgetData, saveBudgetData, exportBudgetData, importBudgetData } from '@/lib/storage';
 
 export default function Home() {
-  const [budgetData, setBudgetData] = useState<BudgetData>(loadBudgetData());
+  const [budgetData, setBudgetData] = useState<BudgetData>(() => {
+    // Use default data for SSR, load from localStorage on client
+    if (typeof window === 'undefined') {
+      return {
+        studyInfo: {
+          protocolNumber: '',
+          studyTitle: '',
+          piName: '',
+          studyDate: '',
+          sponsor: '',
+          siteName: '',
+        },
+        startupFees: [
+          { id: '1', name: 'IRB Fee', amount: 0 },
+          { id: '2', name: 'Ethics Committee Fee', amount: 0 },
+          { id: '3', name: 'Archiving Fee', amount: 0 },
+          { id: '4', name: 'Pharmacy Fee', amount: 0 },
+        ],
+        visits: [],
+        overhead: 30,
+        customRevenueItems: [],
+        targetEnrollment: 0,
+        personnelReimbursements: [],
+        notes: '',
+      };
+    }
+    return loadBudgetData();
+  });
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    saveBudgetData(budgetData);
-  }, [budgetData]);
+    setIsClient(true);
+    // Load data from localStorage on client mount
+    setBudgetData(loadBudgetData());
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      saveBudgetData(budgetData);
+    }
+  }, [budgetData, isClient]);
 
   const updateBudgetData = (updates: Partial<BudgetData>) => {
     setBudgetData(prev => ({ ...prev, ...updates }));
