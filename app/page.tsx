@@ -7,7 +7,7 @@ import {
   Calendar, 
   Users, 
   TrendingUp, 
-  FileText, 
+  FileText,
   Download,
   Upload,
   Plus,
@@ -149,11 +149,11 @@ export default function Home() {
     icon: any;
     category: string;
   }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-50 rounded-lg">
-            <Icon className="w-5 h-5 text-blue-600" />
+          <div className="p-2 bg-gray-100 rounded-lg">
+            <Icon className="w-5 h-5 text-gray-700" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         </div>
@@ -168,7 +168,7 @@ export default function Home() {
 
       <div className="space-y-3">
         {items.map((item, index) => (
-          <div key={item.id || index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+          <div key={item.id || index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
             {category === 'visits' ? (
               <>
                 <input
@@ -176,14 +176,14 @@ export default function Home() {
                   placeholder="Visit Name"
                   value={item.name}
                   onChange={(e) => onUpdate(item.id, { name: e.target.value })}
-                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                 />
                 <input
                   type="number"
                   placeholder="Payment"
                   value={item.paymentPerVisit}
                   onChange={(e) => onUpdate(item.id, { paymentPerVisit: Number(e.target.value) })}
-                  className="w-24 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                 />
               </>
             ) : category === 'customRevenue' ? (
@@ -193,12 +193,12 @@ export default function Home() {
                   placeholder="Description"
                   value={item.name}
                   onChange={(e) => onUpdate(item.id, { name: e.target.value })}
-                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                 />
                 <select
                   value={item.type}
                   onChange={(e) => onUpdate(item.id, { type: e.target.value })}
-                  className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                 >
                   <option value="flat">Flat</option>
                   <option value="perPatient">Per Patient</option>
@@ -209,7 +209,7 @@ export default function Home() {
                   placeholder="Amount"
                   value={item.amount}
                   onChange={(e) => onUpdate(item.id, { amount: Number(e.target.value) })}
-                  className="w-24 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                 />
               </>
             ) : category === 'personnel' ? (
@@ -219,7 +219,7 @@ export default function Home() {
                   placeholder="Role"
                   value={item.role}
                   onChange={(e) => onUpdate(item.id, { role: e.target.value })}
-                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                 />
                 <select
                   value={item.type}
@@ -230,7 +230,7 @@ export default function Home() {
                     monthlyFee: e.target.value === 'flatMonthly' ? 0 : undefined,
                     months: e.target.value === 'flatMonthly' ? 0 : undefined,
                   })}
-                  className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                 >
                   <option value="perPatient">Per Patient</option>
                   <option value="flatMonthly">Monthly</option>
@@ -242,14 +242,14 @@ export default function Home() {
                       placeholder="Rate"
                       value={item.hourlyRate || 0}
                       onChange={(e) => onUpdate(item.id, { hourlyRate: Number(e.target.value) })}
-                      className="w-20 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                     />
                     <input
                       type="number"
                       placeholder="Hours"
                       value={item.hours || 0}
                       onChange={(e) => onUpdate(item.id, { hours: Number(e.target.value) })}
-                      className="w-20 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                     />
                   </>
                 ) : (
@@ -259,14 +259,14 @@ export default function Home() {
                       placeholder="Monthly"
                       value={item.monthlyFee || 0}
                       onChange={(e) => onUpdate(item.id, { monthlyFee: Number(e.target.value) })}
-                      className="w-24 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                     />
                     <input
                       type="number"
                       placeholder="Months"
                       value={item.months || 0}
                       onChange={(e) => onUpdate(item.id, { months: Number(e.target.value) })}
-                      className="w-20 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                     />
                   </>
                 )}
@@ -274,7 +274,7 @@ export default function Home() {
             ) : null}
             <button
               onClick={() => onDelete(item.id)}
-              className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -292,13 +292,13 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-xl">
+              <div className="p-2 bg-blue-600 rounded-lg">
                 <Calculator className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -310,7 +310,7 @@ export default function Home() {
               <div className="flex gap-2">
                 <button
                   onClick={() => exportBudgetData(budgetData)}
-                  className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium border border-gray-300"
                 >
                   <Download className="w-4 h-4" />
                   Export
@@ -323,7 +323,7 @@ export default function Home() {
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-500">Budget Completion</div>
-                <div className="text-lg font-semibold text-blue-600">{completionPercentage}%</div>
+                <div className="text-lg font-semibold text-gray-900">{completionPercentage}%</div>
               </div>
               <div className="w-24 bg-gray-200 rounded-full h-2">
                 <div 
@@ -341,10 +341,10 @@ export default function Home() {
           {/* Main Content */}
           <div className="xl:col-span-2 space-y-8">
             {/* Study Information */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-green-50 rounded-lg">
-                  <FileText className="w-5 h-5 text-green-600" />
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <FileText className="w-5 h-5 text-gray-700" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900">Study Information</h2>
               </div>
@@ -356,7 +356,7 @@ export default function Home() {
                     type="number"
                     value={budgetData.targetEnrollment}
                     onChange={(e) => updateBudgetData({ targetEnrollment: Number(e.target.value) })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                     placeholder="Number of patients"
                     min="1"
                   />
@@ -367,7 +367,7 @@ export default function Home() {
                     type="number"
                     value={budgetData.overhead}
                     onChange={(e) => updateBudgetData({ overhead: Number(e.target.value) })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                     placeholder="Overhead %"
                     min="0"
                     step="0.1"
@@ -377,17 +377,17 @@ export default function Home() {
             </div>
 
             {/* Startup Fees */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <DollarSign className="w-5 h-5 text-blue-600" />
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <DollarSign className="w-5 h-5 text-gray-700" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900">Startup Fees</h2>
               </div>
               
               <div className="space-y-4">
                 {Object.entries(budgetData.startupFees).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <label className="text-gray-700 font-medium capitalize">
                       {key.replace(/([A-Z])/g, ' $1').trim()}
                     </label>
@@ -397,7 +397,7 @@ export default function Home() {
                       onChange={(e) => updateBudgetData({
                         startupFees: { ...budgetData.startupFees, [key]: Number(e.target.value) }
                       })}
-                      className="w-32 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-32 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                       placeholder="Amount"
                     />
                   </div>
@@ -437,10 +437,10 @@ export default function Home() {
             />
 
             {/* Notes */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-purple-50 rounded-lg">
-                  <FileText className="w-5 h-5 text-purple-600" />
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <FileText className="w-5 h-5 text-gray-700" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">Notes</h3>
               </div>
@@ -448,7 +448,7 @@ export default function Home() {
                 value={budgetData.notes}
                 onChange={(e) => updateBudgetData({ notes: e.target.value })}
                 placeholder="Add any additional notes or comments here..."
-                className="w-full h-32 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full h-32 px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 resize-none"
               />
             </div>
           </div>
@@ -456,53 +456,55 @@ export default function Home() {
           {/* Sidebar Summary */}
           <div className="space-y-6">
             {/* Budget Summary */}
-            <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-6 text-white sticky top-24">
-              <h3 className="text-xl font-semibold mb-6">Budget Summary</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Budget Summary</h3>
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-blue-100">Startup Fees</span>
-                  <span className="font-semibold">${totalStartupFees.toLocaleString()}</span>
+                  <span className="text-gray-600">Startup Fees</span>
+                  <span className="font-semibold text-gray-900">${totalStartupFees.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-blue-100">Visit Revenue</span>
-                  <span className="font-semibold">${totalVisitRevenue.toLocaleString()}</span>
+                  <span className="text-gray-600">Visit Revenue</span>
+                  <span className="font-semibold text-gray-900">${totalVisitRevenue.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-blue-100">Custom Revenue</span>
-                  <span className="font-semibold">${totalCustomRevenue.toLocaleString()}</span>
+                  <span className="text-gray-600">Custom Revenue</span>
+                  <span className="font-semibold text-gray-900">${totalCustomRevenue.toLocaleString()}</span>
                 </div>
-                <hr className="border-blue-400" />
+                <hr className="border-gray-200" />
                 <div className="flex justify-between items-center">
-                  <span className="text-blue-100">Subtotal</span>
-                  <span className="font-semibold">${subtotal.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-blue-100">Overhead ({budgetData.overhead}%)</span>
-                  <span className="font-semibold">${overheadAmount.toLocaleString()}</span>
-                </div>
-                <hr className="border-blue-400" />
-                <div className="flex justify-between items-center text-lg">
-                  <span>Total Revenue</span>
-                  <span className="font-bold">${totalRevenue.toLocaleString()}</span>
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="font-semibold text-gray-900">${subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-blue-100">Personnel Costs</span>
-                  <span className="font-semibold text-red-300">-${totalPersonnelCosts.toLocaleString()}</span>
+                  <span className="text-gray-600">Overhead ({budgetData.overhead}%)</span>
+                  <span className="font-semibold text-gray-900">${overheadAmount.toLocaleString()}</span>
                 </div>
-                <hr className="border-blue-400" />
-                <div className="flex justify-between items-center text-lg">
-                  <span>Net Profit</span>
-                  <span className={`font-bold ${netProfit >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                <hr className="border-gray-200" />
+                <div className="flex justify-between items-center text-lg bg-blue-50 p-3 rounded-lg">
+                  <span className="font-semibold text-gray-900">Total Revenue</span>
+                  <span className="font-bold text-gray-900">${totalRevenue.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Personnel Costs</span>
+                  <span className="font-semibold text-red-600">-${totalPersonnelCosts.toLocaleString()}</span>
+                </div>
+                <hr className="border-gray-200" />
+                <div className={`flex justify-between items-center text-lg p-3 rounded-lg ${
+                  netProfit >= 0 ? 'bg-green-50' : 'bg-red-50'
+                }`}>
+                  <span className="font-semibold text-gray-900">Net Profit</span>
+                  <span className={`font-bold ${netProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                     ${netProfit.toLocaleString()}
                   </span>
                 </div>
                 
                 {budgetData.targetEnrollment > 0 && (
-                  <div className="mt-4 pt-4 border-t border-blue-400">
+                  <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="flex justify-between items-center">
-                      <span className="text-blue-100">Revenue Per Patient</span>
-                      <span className="font-semibold">
+                      <span className="text-gray-600">Revenue Per Patient</span>
+                      <span className="font-semibold text-gray-900">
                         ${(totalRevenue / budgetData.targetEnrollment).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
@@ -512,26 +514,26 @@ export default function Home() {
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total Items</span>
-                  <span className="font-medium">
+                  <span className="font-medium text-gray-900">
                     {budgetData.visits.length + budgetData.customRevenueItems.length + budgetData.personnelCosts.length}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Visits</span>
-                  <span className="font-medium">{budgetData.visits.length}</span>
+                  <span className="font-medium text-gray-900">{budgetData.visits.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Patients</span>
-                  <span className="font-medium">{budgetData.targetEnrollment}</span>
+                  <span className="font-medium text-gray-900">{budgetData.targetEnrollment}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Personnel</span>
-                  <span className="font-medium">{budgetData.personnelCosts.length}</span>
+                  <span className="font-medium text-gray-900">{budgetData.personnelCosts.length}</span>
                 </div>
               </div>
             </div>
