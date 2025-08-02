@@ -142,99 +142,94 @@ const ForecastSummary: React.FC<ForecastSummaryProps> = ({ budgetData }) => {
   };
 
   return (
-    <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300">
-      <div className="flex items-center mb-8">
-        <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center mr-4">
-          <span className="text-white font-bold text-xl">📊</span>
-        </div>
-        <h2 className="text-3xl font-bold text-slate-800">Forecast Summary</h2>
-      </div>
+    <div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
-          <h3 className="font-bold text-green-800 text-lg mb-4 flex items-center">
-            💰 Revenue Breakdown
-          </h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Revenue Summary */}
+        <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+          <h4 className="font-semibold text-green-800 mb-3">Total Revenue</h4>
+          <p className="text-2xl font-bold text-green-600">${calculations.totalRevenue.toLocaleString()}</p>
+          <p className="text-sm text-green-700 mt-1">
+            Per Patient: ${calculations.perPatientRevenue.toLocaleString()}
+          </p>
+        </div>
+
+        {/* Cost Summary */}
+        <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+          <h4 className="font-semibold text-red-800 mb-3">Personnel Cost</h4>
+          <p className="text-2xl font-bold text-red-600">${calculations.totalPersonnelCost.toLocaleString()}</p>
+          <p className="text-sm text-red-700 mt-1">
+            Per Patient: ${calculations.perPatientCost.toLocaleString()}
+          </p>
+        </div>
+
+        {/* Margin Summary */}
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+          <h4 className="font-semibold text-blue-800 mb-3">Net Margin</h4>
+          <p className={`text-2xl font-bold ${calculations.margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            ${calculations.margin.toLocaleString()}
+          </p>
+          <p className={`text-sm mt-1 ${calculations.margin >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+            {calculations.marginPercentage.toFixed(1)}% margin
+          </p>
+        </div>
+      </div>
+
+      {/* Detailed Breakdown */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+          <h4 className="font-semibold text-gray-800 mb-3">Revenue Breakdown</h4>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span>Startup Fees:</span>
+              <span className="text-gray-600">Startup Fees:</span>
               <span className="font-medium">${calculations.totalStartupFees.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span>Visit Revenue:</span>
+              <span className="text-gray-600">Visit Revenue:</span>
               <span className="font-medium">${calculations.totalVisitRevenue.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span>Custom Revenue:</span>
+              <span className="text-gray-600">Custom Revenue:</span>
               <span className="font-medium">${calculations.customRevenue.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span>Overhead ({budgetData.overhead}%):</span>
+              <span className="text-gray-600">Overhead ({budgetData.overhead}%):</span>
               <span className="font-medium">${calculations.overheadAmount.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between border-t pt-2">
-              <span className="font-medium">Total Revenue:</span>
-              <span className="font-bold text-green-600">${calculations.totalRevenue.toLocaleString()}</span>
-            </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6 border border-red-200">
-          <h3 className="font-bold text-red-800 text-lg mb-4 flex items-center">
-            📈 Cost & Margin
-          </h3>
+        <div>
+          <h4 className="font-semibold text-gray-800 mb-3">Study Metrics</h4>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span>Personnel Cost:</span>
-              <span className="font-medium text-red-600">${calculations.totalPersonnelCost.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between border-t pt-2">
-              <span className="font-medium">Margin:</span>
-              <span className={`font-bold ${calculations.margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                ${calculations.margin.toLocaleString()} ({calculations.marginPercentage.toFixed(1)}%)
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h3 className="font-medium text-blue-900 mb-2">Per-Patient Metrics</h3>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span>Revenue per Patient:</span>
-              <span className="font-medium">${calculations.perPatientRevenue.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Cost per Patient:</span>
-              <span className="font-medium">${calculations.perPatientCost.toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-medium text-gray-900 mb-2">Study Metrics</h3>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span>Target Enrollment:</span>
+              <span className="text-gray-600">Target Enrollment:</span>
               <span className="font-medium">{budgetData.targetEnrollment} patients</span>
             </div>
             <div className="flex justify-between">
-              <span>Number of Visits:</span>
+              <span className="text-gray-600">Number of Visits:</span>
               <span className="font-medium">{budgetData.visits.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Personnel Items:</span>
+              <span className="font-medium">{budgetData.personnelCosts.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Custom Revenue Items:</span>
+              <span className="font-medium">{budgetData.customRevenueItems.length}</span>
             </div>
           </div>
         </div>
       </div>
 
+
       <div className="mt-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium text-gray-700">Revenue Visualization</h3>
+          <h4 className="font-semibold text-gray-800">Budget Visualization</h4>
           <div className="flex gap-2">
             <button
               onClick={() => setChartType('bar')}
-              className={`px-3 py-1 rounded text-sm ${
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                 chartType === 'bar'
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -244,7 +239,7 @@ const ForecastSummary: React.FC<ForecastSummaryProps> = ({ budgetData }) => {
             </button>
             <button
               onClick={() => setChartType('line')}
-              className={`px-3 py-1 rounded text-sm ${
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                 chartType === 'line'
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -254,7 +249,7 @@ const ForecastSummary: React.FC<ForecastSummaryProps> = ({ budgetData }) => {
             </button>
           </div>
         </div>
-        <div className="h-64">
+        <div className="h-80 bg-gray-50 rounded-lg p-4">
           {chartType === 'bar' ? (
             <Bar data={chartData} options={chartOptions} />
           ) : (
