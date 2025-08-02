@@ -574,7 +574,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Overhead Percentage</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Overhead Rate (%)</label>
                   <input
                     type="number"
                     value={budgetData.overhead}
