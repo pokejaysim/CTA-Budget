@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  CircleDollarSign, 
+  Calculator, 
+  DollarSign, 
   Calendar, 
   Users, 
   TrendingUp, 
@@ -11,15 +11,13 @@ import {
   Download,
   Upload,
   Plus,
-  Trash2,
-  Calculator
+  Trash2
 } from 'lucide-react';
 import type { BudgetData, Visit, CustomRevenueItem, PersonnelCost } from '@/types/budget';
 import { loadBudgetData, saveBudgetData, exportBudgetData, importBudgetData } from '@/lib/storage';
 
 export default function Home() {
   const [budgetData, setBudgetData] = useState<BudgetData>(loadBudgetData());
-  const [activeTab, setActiveTab] = useState('startup');
 
   useEffect(() => {
     saveBudgetData(budgetData);
@@ -29,6 +27,7 @@ export default function Home() {
     setBudgetData(prev => ({ ...prev, ...updates }));
   };
 
+  // Calculate totals
   const totalStartupFees = Object.values(budgetData.startupFees).reduce((sum, fee) => sum + fee, 0);
   const totalVisitRevenue = budgetData.visits.reduce((sum, visit) => sum + (visit.paymentPerVisit * budgetData.targetEnrollment), 0);
   const totalCustomRevenue = budgetData.customRevenueItems.reduce((sum, item) => {
@@ -51,6 +50,15 @@ export default function Home() {
   const overheadAmount = subtotal * (budgetData.overhead / 100);
   const totalRevenue = subtotal + overheadAmount;
   const netProfit = totalRevenue - totalPersonnelCosts;
+
+  // Calculate completion percentage
+  const completionPercentage = Math.min(100, (
+    (budgetData.targetEnrollment > 0 ? 20 : 0) +
+    (budgetData.visits.length > 0 ? 20 : 0) +
+    (budgetData.customRevenueItems.length > 0 ? 20 : 0) +
+    (budgetData.personnelCosts.length > 0 ? 20 : 0) +
+    (Object.values(budgetData.startupFees).some(fee => fee > 0) ? 20 : 0)
+  ));
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -132,462 +140,404 @@ export default function Home() {
     });
   };
 
-  const tabs = [
-    { id: 'startup', label: 'Startup Fees', icon: CircleDollarSign },
-    { id: 'visits', label: 'Visit Schedule', icon: Calendar },
-    { id: 'enrollment', label: 'Target Enrollment', icon: Users },
-    { id: 'revenue', label: 'Custom Revenue', icon: TrendingUp },
-    { id: 'personnel', label: 'Personnel Costs', icon: Users },
-    { id: 'summary', label: 'Forecast Summary', icon: Calculator },
-    { id: 'notes', label: 'Notes', icon: FileText },
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
-      {/* Animated background */}
-      <div className="fixed inset-0 overflow-hidden">
-        <div className="absolute -inset-[10px] opacity-50">
-          <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" />
-          <div className="absolute top-0 -right-4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000" />
-          <div className="absolute -bottom-8 left-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000" />
+  const CostSection = ({ title, items, onAdd, onUpdate, onDelete, icon: Icon, category }: {
+    title: string;
+    items: any[];
+    onAdd: () => void;
+    onUpdate: (id: string, updates: any) => void;
+    onDelete: (id: string) => void;
+    icon: any;
+    category: string;
+  }) => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-50 rounded-lg">
+            <Icon className="w-5 h-5 text-blue-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         </div>
+        <button
+          onClick={onAdd}
+          className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+        >
+          <Plus className="w-4 h-4" />
+          Add Item
+        </button>
       </div>
 
-      <div className="relative z-10">
-        {/* Header */}
-        <header className="glass border-b border-white/10">
-          <div className="container mx-auto px-6 py-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-white">Clinical Trial Budget Forecaster</h1>
-                <p className="text-gray-300 mt-1">Professional budget planning and forecasting</p>
+      <div className="space-y-3">
+        {items.map((item, index) => (
+          <div key={item.id || index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            {category === 'visits' ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="Visit Name"
+                  value={item.name}
+                  onChange={(e) => onUpdate(item.id, { name: e.target.value })}
+                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+                <input
+                  type="number"
+                  placeholder="Payment"
+                  value={item.paymentPerVisit}
+                  onChange={(e) => onUpdate(item.id, { paymentPerVisit: Number(e.target.value) })}
+                  className="w-24 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </>
+            ) : category === 'customRevenue' ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="Description"
+                  value={item.name}
+                  onChange={(e) => onUpdate(item.id, { name: e.target.value })}
+                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+                <select
+                  value={item.type}
+                  onChange={(e) => onUpdate(item.id, { type: e.target.value })}
+                  className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                >
+                  <option value="flat">Flat</option>
+                  <option value="perPatient">Per Patient</option>
+                  <option value="perVisit">Per Visit</option>
+                </select>
+                <input
+                  type="number"
+                  placeholder="Amount"
+                  value={item.amount}
+                  onChange={(e) => onUpdate(item.id, { amount: Number(e.target.value) })}
+                  className="w-24 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </>
+            ) : category === 'personnel' ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="Role"
+                  value={item.role}
+                  onChange={(e) => onUpdate(item.id, { role: e.target.value })}
+                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+                <select
+                  value={item.type}
+                  onChange={(e) => onUpdate(item.id, { 
+                    type: e.target.value,
+                    hourlyRate: e.target.value === 'perPatient' ? 0 : undefined,
+                    hours: e.target.value === 'perPatient' ? 0 : undefined,
+                    monthlyFee: e.target.value === 'flatMonthly' ? 0 : undefined,
+                    months: e.target.value === 'flatMonthly' ? 0 : undefined,
+                  })}
+                  className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                >
+                  <option value="perPatient">Per Patient</option>
+                  <option value="flatMonthly">Monthly</option>
+                </select>
+                {item.type === 'perPatient' ? (
+                  <>
+                    <input
+                      type="number"
+                      placeholder="Rate"
+                      value={item.hourlyRate || 0}
+                      onChange={(e) => onUpdate(item.id, { hourlyRate: Number(e.target.value) })}
+                      className="w-20 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Hours"
+                      value={item.hours || 0}
+                      onChange={(e) => onUpdate(item.id, { hours: Number(e.target.value) })}
+                      className="w-20 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type="number"
+                      placeholder="Monthly"
+                      value={item.monthlyFee || 0}
+                      onChange={(e) => onUpdate(item.id, { monthlyFee: Number(e.target.value) })}
+                      className="w-24 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Months"
+                      value={item.months || 0}
+                      onChange={(e) => onUpdate(item.id, { months: Number(e.target.value) })}
+                      className="w-20 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                  </>
+                )}
+              </>
+            ) : null}
+            <button
+              onClick={() => onDelete(item.id)}
+              className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+        
+        {items.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <div className="text-sm">No items added yet</div>
+            <div className="text-xs text-gray-400 mt-1">Click &quot;Add Item&quot; to get started</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-600 rounded-xl">
+                <Calculator className="w-6 h-6 text-white" />
               </div>
-              <div className="flex gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Clinical Trial Budget Forecaster</h1>
+                <p className="text-sm text-gray-600">Comprehensive clinical trial budget planning</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-2">
+                <button
                   onClick={() => exportBudgetData(budgetData)}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg flex items-center gap-2 transition-all backdrop-blur-sm border border-white/20"
+                  className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
                 >
-                  <Download size={20} />
+                  <Download className="w-4 h-4" />
                   Export
-                </motion.button>
-                <motion.label
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg flex items-center gap-2 cursor-pointer transition-all shadow-lg"
-                >
-                  <Upload size={20} />
+                </button>
+                <label className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer">
+                  <Upload className="w-4 h-4" />
                   Import
                   <input type="file" accept=".json" onChange={handleImport} className="hidden" />
-                </motion.label>
+                </label>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-500">Budget Completion</div>
+                <div className="text-lg font-semibold text-blue-600">{completionPercentage}%</div>
+              </div>
+              <div className="w-24 bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${completionPercentage}%` }}
+                />
               </div>
             </div>
           </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="container mx-auto px-6 py-8">
-          {/* Tabs */}
-          <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <motion.button
-                  key={tab.id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-all ${
-                    activeTab === tab.id
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                      : 'glass text-gray-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <Icon size={20} />
-                  {tab.label}
-                </motion.button>
-              );
-            })}
-          </div>
-
-          {/* Tab Content */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="glass rounded-2xl p-8"
-            >
-              {activeTab === 'startup' && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">Startup Fees</h2>
-                  <div className="grid gap-4">
-                    {Object.entries(budgetData.startupFees).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between p-4 glass rounded-lg">
-                        <label className="text-gray-300 capitalize">
-                          {key.replace(/([A-Z])/g, ' $1').trim()}
-                        </label>
-                        <input
-                          type="number"
-                          value={value}
-                          onChange={(e) => updateBudgetData({
-                            startupFees: { ...budgetData.startupFees, [key]: Number(e.target.value) }
-                          })}
-                          className="w-32 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-purple-500"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="pt-4 border-t border-white/10">
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg text-gray-300">Total Startup Fees</span>
-                      <span className="text-2xl font-bold text-white">${totalStartupFees.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'visits' && (
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-white">Visit Schedule</h2>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={addVisit}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg flex items-center gap-2"
-                    >
-                      <Plus size={20} />
-                      Add Visit
-                    </motion.button>
-                  </div>
-                  <div className="space-y-3">
-                    {budgetData.visits.map((visit) => (
-                      <motion.div
-                        key={visit.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex gap-3 items-center p-4 glass rounded-lg"
-                      >
-                        <input
-                          type="text"
-                          value={visit.name}
-                          onChange={(e) => updateVisit(visit.id, { name: e.target.value })}
-                          className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                        />
-                        <input
-                          type="number"
-                          value={visit.paymentPerVisit}
-                          onChange={(e) => updateVisit(visit.id, { paymentPerVisit: Number(e.target.value) })}
-                          placeholder="Payment per visit"
-                          className="w-40 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                        />
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => deleteVisit(visit.id)}
-                          className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={20} />
-                        </motion.button>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'enrollment' && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">Target Enrollment & Overhead</h2>
-                  <div className="space-y-4">
-                    <div className="p-6 glass rounded-lg">
-                      <label className="block text-gray-300 mb-2">Target Enrollment</label>
-                      <input
-                        type="number"
-                        value={budgetData.targetEnrollment}
-                        onChange={(e) => updateBudgetData({ targetEnrollment: Number(e.target.value) })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-lg"
-                      />
-                    </div>
-                    <div className="p-6 glass rounded-lg">
-                      <label className="block text-gray-300 mb-2">Overhead Percentage</label>
-                      <input
-                        type="number"
-                        value={budgetData.overhead}
-                        onChange={(e) => updateBudgetData({ overhead: Number(e.target.value) })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-lg"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'revenue' && (
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-white">Custom Revenue Items</h2>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={addCustomRevenueItem}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg flex items-center gap-2"
-                    >
-                      <Plus size={20} />
-                      Add Item
-                    </motion.button>
-                  </div>
-                  <div className="space-y-3">
-                    {budgetData.customRevenueItems.map((item) => (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="p-4 glass rounded-lg space-y-3"
-                      >
-                        <div className="flex gap-3">
-                          <input
-                            type="text"
-                            value={item.name}
-                            onChange={(e) => updateCustomRevenueItem(item.id, { name: e.target.value })}
-                            className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                          />
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => deleteCustomRevenueItem(item.id)}
-                            className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg"
-                          >
-                            <Trash2 size={20} />
-                          </motion.button>
-                        </div>
-                        <div className="flex gap-3">
-                          <select
-                            value={item.type}
-                            onChange={(e) => updateCustomRevenueItem(item.id, { type: e.target.value as 'flat' | 'perPatient' | 'perVisit' })}
-                            className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                          >
-                            <option value="flat">Flat Amount</option>
-                            <option value="perPatient">Per Patient</option>
-                            <option value="perVisit">Per Visit</option>
-                          </select>
-                          <input
-                            type="number"
-                            value={item.amount}
-                            onChange={(e) => updateCustomRevenueItem(item.id, { amount: Number(e.target.value) })}
-                            placeholder="Amount"
-                            className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                          />
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'personnel' && (
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-white">Personnel Costs</h2>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={addPersonnelCost}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg flex items-center gap-2"
-                    >
-                      <Plus size={20} />
-                      Add Personnel
-                    </motion.button>
-                  </div>
-                  <div className="space-y-3">
-                    {budgetData.personnelCosts.map((cost) => (
-                      <motion.div
-                        key={cost.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="p-4 glass rounded-lg space-y-3"
-                      >
-                        <div className="flex gap-3">
-                          <input
-                            type="text"
-                            value={cost.role}
-                            onChange={(e) => updatePersonnelCost(cost.id, { role: e.target.value })}
-                            placeholder="Role"
-                            className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                          />
-                          <select
-                            value={cost.type}
-                            onChange={(e) => updatePersonnelCost(cost.id, { 
-                              type: e.target.value as 'perPatient' | 'flatMonthly',
-                              hourlyRate: e.target.value === 'perPatient' ? 0 : undefined,
-                              hours: e.target.value === 'perPatient' ? 0 : undefined,
-                              monthlyFee: e.target.value === 'flatMonthly' ? 0 : undefined,
-                              months: e.target.value === 'flatMonthly' ? 0 : undefined,
-                            })}
-                            className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                          >
-                            <option value="perPatient">Per Patient</option>
-                            <option value="flatMonthly">Flat Monthly</option>
-                          </select>
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => deletePersonnelCost(cost.id)}
-                            className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg"
-                          >
-                            <Trash2 size={20} />
-                          </motion.button>
-                        </div>
-                        {cost.type === 'perPatient' ? (
-                          <div className="flex gap-3">
-                            <input
-                              type="number"
-                              value={cost.hourlyRate || 0}
-                              onChange={(e) => updatePersonnelCost(cost.id, { hourlyRate: Number(e.target.value) })}
-                              placeholder="Hourly Rate"
-                              className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                            />
-                            <input
-                              type="number"
-                              value={cost.hours || 0}
-                              onChange={(e) => updatePersonnelCost(cost.id, { hours: Number(e.target.value) })}
-                              placeholder="Hours"
-                              className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                            />
-                          </div>
-                        ) : (
-                          <div className="flex gap-3">
-                            <input
-                              type="number"
-                              value={cost.monthlyFee || 0}
-                              onChange={(e) => updatePersonnelCost(cost.id, { monthlyFee: Number(e.target.value) })}
-                              placeholder="Monthly Fee"
-                              className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                            />
-                            <input
-                              type="number"
-                              value={cost.months || 0}
-                              onChange={(e) => updatePersonnelCost(cost.id, { months: Number(e.target.value) })}
-                              placeholder="Months"
-                              className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                            />
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'summary' && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">Forecast Summary</h2>
-                  <div className="grid gap-4">
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 }}
-                      className="p-6 glass rounded-lg"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Startup Fees</span>
-                        <span className="text-xl text-white">${totalStartupFees.toLocaleString()}</span>
-                      </div>
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="p-6 glass rounded-lg"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Visit Revenue</span>
-                        <span className="text-xl text-white">${totalVisitRevenue.toLocaleString()}</span>
-                      </div>
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="p-6 glass rounded-lg"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Custom Revenue</span>
-                        <span className="text-xl text-white">${totalCustomRevenue.toLocaleString()}</span>
-                      </div>
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 }}
-                      className="p-6 glass rounded-lg"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Overhead ({budgetData.overhead}%)</span>
-                        <span className="text-xl text-white">${overheadAmount.toLocaleString()}</span>
-                      </div>
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
-                      className="p-6 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-lg"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold text-white">Total Revenue</span>
-                        <span className="text-2xl font-bold text-white">${totalRevenue.toLocaleString()}</span>
-                      </div>
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 }}
-                      className="p-6 glass rounded-lg"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Personnel Costs</span>
-                        <span className="text-xl text-red-400">-${totalPersonnelCosts.toLocaleString()}</span>
-                      </div>
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.7 }}
-                      className={`p-6 rounded-lg ${
-                        netProfit >= 0 
-                          ? 'bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/30' 
-                          : 'bg-gradient-to-r from-red-600/20 to-pink-600/20 border border-red-500/30'
-                      }`}
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold text-white">Net Profit</span>
-                        <span className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          ${netProfit.toLocaleString()}
-                        </span>
-                      </div>
-                    </motion.div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'notes' && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">Notes</h2>
-                  <textarea
-                    value={budgetData.notes}
-                    onChange={(e) => updateBudgetData({ notes: e.target.value })}
-                    placeholder="Add any additional notes or comments here..."
-                    className="w-full h-64 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 resize-none focus:outline-none focus:border-purple-500"
-                  />
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </main>
+        </div>
       </div>
 
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="xl:col-span-2 space-y-8">
+            {/* Study Information */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-green-50 rounded-lg">
+                  <FileText className="w-5 h-5 text-green-600" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Study Information</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Target Enrollment</label>
+                  <input
+                    type="number"
+                    value={budgetData.targetEnrollment}
+                    onChange={(e) => updateBudgetData({ targetEnrollment: Number(e.target.value) })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Number of patients"
+                    min="1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Overhead Percentage</label>
+                  <input
+                    type="number"
+                    value={budgetData.overhead}
+                    onChange={(e) => updateBudgetData({ overhead: Number(e.target.value) })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Overhead %"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Startup Fees */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <DollarSign className="w-5 h-5 text-blue-600" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Startup Fees</h2>
+              </div>
+              
+              <div className="space-y-4">
+                {Object.entries(budgetData.startupFees).map(([key, value]) => (
+                  <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <label className="text-gray-700 font-medium capitalize">
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    </label>
+                    <input
+                      type="number"
+                      value={value}
+                      onChange={(e) => updateBudgetData({
+                        startupFees: { ...budgetData.startupFees, [key]: Number(e.target.value) }
+                      })}
+                      className="w-32 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      placeholder="Amount"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Cost Sections */}
+            <CostSection 
+              title="Visit Schedule" 
+              category="visits"
+              items={budgetData.visits}
+              onAdd={addVisit}
+              onUpdate={updateVisit}
+              onDelete={deleteVisit}
+              icon={Calendar}
+            />
+            
+            <CostSection 
+              title="Custom Revenue Items" 
+              category="customRevenue"
+              items={budgetData.customRevenueItems}
+              onAdd={addCustomRevenueItem}
+              onUpdate={updateCustomRevenueItem}
+              onDelete={deleteCustomRevenueItem}
+              icon={TrendingUp}
+            />
+            
+            <CostSection 
+              title="Personnel Costs" 
+              category="personnel"
+              items={budgetData.personnelCosts}
+              onAdd={addPersonnelCost}
+              onUpdate={updatePersonnelCost}
+              onDelete={deletePersonnelCost}
+              icon={Users}
+            />
+
+            {/* Notes */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-purple-50 rounded-lg">
+                  <FileText className="w-5 h-5 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Notes</h3>
+              </div>
+              <textarea
+                value={budgetData.notes}
+                onChange={(e) => updateBudgetData({ notes: e.target.value })}
+                placeholder="Add any additional notes or comments here..."
+                className="w-full h-32 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              />
+            </div>
+          </div>
+
+          {/* Sidebar Summary */}
+          <div className="space-y-6">
+            {/* Budget Summary */}
+            <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-6 text-white sticky top-24">
+              <h3 className="text-xl font-semibold mb-6">Budget Summary</h3>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-100">Startup Fees</span>
+                  <span className="font-semibold">${totalStartupFees.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-100">Visit Revenue</span>
+                  <span className="font-semibold">${totalVisitRevenue.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-100">Custom Revenue</span>
+                  <span className="font-semibold">${totalCustomRevenue.toLocaleString()}</span>
+                </div>
+                <hr className="border-blue-400" />
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-100">Subtotal</span>
+                  <span className="font-semibold">${subtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-100">Overhead ({budgetData.overhead}%)</span>
+                  <span className="font-semibold">${overheadAmount.toLocaleString()}</span>
+                </div>
+                <hr className="border-blue-400" />
+                <div className="flex justify-between items-center text-lg">
+                  <span>Total Revenue</span>
+                  <span className="font-bold">${totalRevenue.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-100">Personnel Costs</span>
+                  <span className="font-semibold text-red-300">-${totalPersonnelCosts.toLocaleString()}</span>
+                </div>
+                <hr className="border-blue-400" />
+                <div className="flex justify-between items-center text-lg">
+                  <span>Net Profit</span>
+                  <span className={`font-bold ${netProfit >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                    ${netProfit.toLocaleString()}
+                  </span>
+                </div>
+                
+                {budgetData.targetEnrollment > 0 && (
+                  <div className="mt-4 pt-4 border-t border-blue-400">
+                    <div className="flex justify-between items-center">
+                      <span className="text-blue-100">Revenue Per Patient</span>
+                      <span className="font-semibold">
+                        ${(totalRevenue / budgetData.targetEnrollment).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Items</span>
+                  <span className="font-medium">
+                    {budgetData.visits.length + budgetData.customRevenueItems.length + budgetData.personnelCosts.length}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Visits</span>
+                  <span className="font-medium">{budgetData.visits.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Patients</span>
+                  <span className="font-medium">{budgetData.targetEnrollment}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Personnel</span>
+                  <span className="font-medium">{budgetData.personnelCosts.length}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
