@@ -12,10 +12,180 @@ import {
   Upload,
   Plus,
   Trash2,
-  Building2
+  Building2,
+  Save
 } from 'lucide-react';
 import type { BudgetData, Visit, CustomRevenueItem, PersonnelReimbursement, StartupFeeItem } from '@/types/budget';
 import { loadBudgetData, saveBudgetData, exportBudgetData, importBudgetData } from '@/lib/storage';
+
+// Move CostSection component outside to prevent re-creation on each render
+const CostSection = ({ title, items, onAdd, onUpdate, onDelete, icon: Icon, category }: {
+  title: string;
+  items: any[];
+  onAdd: () => void;
+  onUpdate: (id: string, updates: any) => void;
+  onDelete: (id: string) => void;
+  icon: any;
+  category: string;
+}) => (
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-gray-100 rounded-lg">
+          <Icon className="w-5 h-5 text-gray-700" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+      </div>
+      <button
+        onClick={onAdd}
+        className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+      >
+        <Plus className="w-4 h-4" />
+        Add Item
+      </button>
+    </div>
+
+    <div className="space-y-3">
+      {items.map((item, index) => (
+        <div key={item.id || index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          {category === 'startupFees' ? (
+            <>
+              <input
+                type="text"
+                placeholder="Fee Name"
+                value={item.name}
+                onChange={(e) => onUpdate(item.id, { name: e.target.value })}
+                className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+              />
+              <input
+                type="number"
+                placeholder="Amount"
+                value={item.amount}
+                onChange={(e) => onUpdate(item.id, { amount: Number(e.target.value) })}
+                className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+              />
+            </>
+          ) : category === 'visits' ? (
+            <>
+              <input
+                type="text"
+                placeholder="Visit Name"
+                value={item.name}
+                onChange={(e) => onUpdate(item.id, { name: e.target.value })}
+                className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+              />
+              <input
+                type="number"
+                placeholder="Payment"
+                value={item.paymentPerVisit}
+                onChange={(e) => onUpdate(item.id, { paymentPerVisit: Number(e.target.value) })}
+                className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+              />
+            </>
+          ) : category === 'customRevenue' ? (
+            <>
+              <input
+                type="text"
+                placeholder="Description"
+                value={item.name}
+                onChange={(e) => onUpdate(item.id, { name: e.target.value })}
+                className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+              />
+              <select
+                value={item.type}
+                onChange={(e) => onUpdate(item.id, { type: e.target.value })}
+                className="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+              >
+                <option value="flat">Flat</option>
+                <option value="perPatient">Per Patient</option>
+                <option value="perVisit">Per Visit</option>
+              </select>
+              <input
+                type="number"
+                placeholder="Amount"
+                value={item.amount}
+                onChange={(e) => onUpdate(item.id, { amount: Number(e.target.value) })}
+                className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+              />
+            </>
+          ) : category === 'personnelReimbursements' ? (
+            <>
+              <input
+                type="text"
+                placeholder="Role (e.g., Study Coordinator Fee)"
+                value={item.role}
+                onChange={(e) => onUpdate(item.id, { role: e.target.value })}
+                className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+              />
+              <select
+                value={item.type}
+                onChange={(e) => onUpdate(item.id, { 
+                  type: e.target.value,
+                  hourlyRate: e.target.value === 'perPatient' ? 0 : undefined,
+                  hours: e.target.value === 'perPatient' ? 0 : undefined,
+                  monthlyFee: e.target.value === 'flatMonthly' ? 0 : undefined,
+                  months: e.target.value === 'flatMonthly' ? 0 : undefined,
+                })}
+                className="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+              >
+                <option value="perPatient">Per Patient</option>
+                <option value="flatMonthly">Monthly</option>
+              </select>
+              {item.type === 'perPatient' ? (
+                <>
+                  <input
+                    type="number"
+                    placeholder="Rate"
+                    value={item.hourlyRate || 0}
+                    onChange={(e) => onUpdate(item.id, { hourlyRate: Number(e.target.value) })}
+                    className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Hours"
+                    value={item.hours || 0}
+                    onChange={(e) => onUpdate(item.id, { hours: Number(e.target.value) })}
+                    className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+                  />
+                </>
+              ) : (
+                <>
+                  <input
+                    type="number"
+                    placeholder="Monthly"
+                    value={item.monthlyFee || 0}
+                    onChange={(e) => onUpdate(item.id, { monthlyFee: Number(e.target.value) })}
+                    className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Months"
+                    value={item.months || 0}
+                    onChange={(e) => onUpdate(item.id, { months: Number(e.target.value) })}
+                    className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
+                  />
+                </>
+              )}
+            </>
+          ) : null}
+          <button
+            onClick={() => onDelete(item.id)}
+            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      ))}
+      
+      {items.length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          <div className="text-sm">No items added yet</div>
+          <div className="text-xs text-gray-400 mt-1">Click &quot;Add Item&quot; to get started</div>
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 export default function Home() {
   const [budgetData, setBudgetData] = useState<BudgetData>(() => {
@@ -87,16 +257,6 @@ export default function Home() {
   const overheadAmount = subtotal * (budgetData.overhead / 100);
   const totalRevenue = subtotal + overheadAmount;
 
-  // Calculate completion percentage
-  const completionPercentage = Math.min(100, (
-    (budgetData.targetEnrollment > 0 ? 15 : 0) +
-    (budgetData.visits.length > 0 ? 15 : 0) +
-    (budgetData.customRevenueItems.length > 0 ? 15 : 0) +
-    (budgetData.personnelReimbursements.length > 0 ? 15 : 0) +
-    (budgetData.startupFees.some(fee => fee.amount > 0) ? 15 : 0) +
-    (budgetData.studyInfo.protocolNumber ? 25 : 0)
-  ));
-
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -107,6 +267,10 @@ export default function Home() {
         console.error('Import failed:', error);
       }
     }
+  };
+
+  const handleSave = () => {
+    exportBudgetData(budgetData);
   };
 
   // Startup Fee functions
@@ -204,174 +368,6 @@ export default function Home() {
     });
   };
 
-  const CostSection = ({ title, items, onAdd, onUpdate, onDelete, icon: Icon, category }: {
-    title: string;
-    items: any[];
-    onAdd: () => void;
-    onUpdate: (id: string, updates: any) => void;
-    onDelete: (id: string) => void;
-    icon: any;
-    category: string;
-  }) => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-gray-100 rounded-lg">
-            <Icon className="w-5 h-5 text-gray-700" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        </div>
-        <button
-          onClick={onAdd}
-          className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-        >
-          <Plus className="w-4 h-4" />
-          Add Item
-        </button>
-      </div>
-
-      <div className="space-y-3">
-        {items.map((item, index) => (
-          <div key={item.id || index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-            {category === 'startupFees' ? (
-              <>
-                <input
-                  type="text"
-                  placeholder="Fee Name"
-                  value={item.name}
-                  onChange={(e) => onUpdate(item.id, { name: e.target.value })}
-                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                />
-                <input
-                  type="number"
-                  placeholder="Amount"
-                  value={item.amount}
-                  onChange={(e) => onUpdate(item.id, { amount: Number(e.target.value) })}
-                  className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                />
-              </>
-            ) : category === 'visits' ? (
-              <>
-                <input
-                  type="text"
-                  placeholder="Visit Name"
-                  value={item.name}
-                  onChange={(e) => onUpdate(item.id, { name: e.target.value })}
-                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                />
-                <input
-                  type="number"
-                  placeholder="Payment"
-                  value={item.paymentPerVisit}
-                  onChange={(e) => onUpdate(item.id, { paymentPerVisit: Number(e.target.value) })}
-                  className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                />
-              </>
-            ) : category === 'customRevenue' ? (
-              <>
-                <input
-                  type="text"
-                  placeholder="Description"
-                  value={item.name}
-                  onChange={(e) => onUpdate(item.id, { name: e.target.value })}
-                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                />
-                <select
-                  value={item.type}
-                  onChange={(e) => onUpdate(item.id, { type: e.target.value })}
-                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                >
-                  <option value="flat">Flat</option>
-                  <option value="perPatient">Per Patient</option>
-                  <option value="perVisit">Per Visit</option>
-                </select>
-                <input
-                  type="number"
-                  placeholder="Amount"
-                  value={item.amount}
-                  onChange={(e) => onUpdate(item.id, { amount: Number(e.target.value) })}
-                  className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                />
-              </>
-            ) : category === 'personnelReimbursements' ? (
-              <>
-                <input
-                  type="text"
-                  placeholder="Role (e.g., Study Coordinator Fee)"
-                  value={item.role}
-                  onChange={(e) => onUpdate(item.id, { role: e.target.value })}
-                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                />
-                <select
-                  value={item.type}
-                  onChange={(e) => onUpdate(item.id, { 
-                    type: e.target.value,
-                    hourlyRate: e.target.value === 'perPatient' ? 0 : undefined,
-                    hours: e.target.value === 'perPatient' ? 0 : undefined,
-                    monthlyFee: e.target.value === 'flatMonthly' ? 0 : undefined,
-                    months: e.target.value === 'flatMonthly' ? 0 : undefined,
-                  })}
-                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                >
-                  <option value="perPatient">Per Patient</option>
-                  <option value="flatMonthly">Monthly</option>
-                </select>
-                {item.type === 'perPatient' ? (
-                  <>
-                    <input
-                      type="number"
-                      placeholder="Rate"
-                      value={item.hourlyRate || 0}
-                      onChange={(e) => onUpdate(item.id, { hourlyRate: Number(e.target.value) })}
-                      className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Hours"
-                      value={item.hours || 0}
-                      onChange={(e) => onUpdate(item.id, { hours: Number(e.target.value) })}
-                      className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <input
-                      type="number"
-                      placeholder="Monthly"
-                      value={item.monthlyFee || 0}
-                      onChange={(e) => onUpdate(item.id, { monthlyFee: Number(e.target.value) })}
-                      className="w-24 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Months"
-                      value={item.months || 0}
-                      onChange={(e) => onUpdate(item.id, { months: Number(e.target.value) })}
-                      className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
-                    />
-                  </>
-                )}
-              </>
-            ) : null}
-            <button
-              onClick={() => onDelete(item.id)}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        ))}
-        
-        {items.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            <div className="text-sm">No items added yet</div>
-            <div className="text-xs text-gray-400 mt-1">Click &quot;Add Item&quot; to get started</div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -387,31 +383,26 @@ export default function Home() {
                 <p className="text-sm text-gray-600">Comprehensive clinical trial budget planning</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => exportBudgetData(budgetData)}
-                  className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium border border-gray-300"
-                >
-                  <Download className="w-4 h-4" />
-                  Export
-                </button>
-                <label className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer">
-                  <Upload className="w-4 h-4" />
-                  Import
-                  <input type="file" accept=".json" onChange={handleImport} className="hidden" />
-                </label>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-500">Budget Completion</div>
-                <div className="text-lg font-semibold text-gray-900">{completionPercentage}%</div>
-              </div>
-              <div className="w-24 bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${completionPercentage}%` }}
-                />
-              </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSave}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              >
+                <Save className="w-4 h-4" />
+                Save Budget
+              </button>
+              <button
+                onClick={() => exportBudgetData(budgetData)}
+                className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium border border-gray-300"
+              >
+                <Download className="w-4 h-4" />
+                Export
+              </button>
+              <label className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer">
+                <Upload className="w-4 h-4" />
+                Import
+                <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+              </label>
             </div>
           </div>
         </div>
