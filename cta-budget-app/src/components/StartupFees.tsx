@@ -12,89 +12,36 @@ const StartupFees: React.FC<StartupFeesProps> = ({ fees, onChange }) => {
     onChange({ ...fees, [field]: numValue });
   };
 
+  const inputFields = [
+    { key: 'irbFee' as keyof StartupFeesType, label: 'IRB Fee', placeholder: 'Enter IRB fee' },
+    { key: 'ethicsFee' as keyof StartupFeesType, label: 'Ethics Fee', placeholder: 'Enter ethics fee' },
+    { key: 'archivingFee' as keyof StartupFeesType, label: 'Archiving Fee', placeholder: 'Enter archiving fee' },
+    { key: 'pharmacyFee' as keyof StartupFeesType, label: 'Pharmacy Fee', placeholder: 'Enter pharmacy fee' },
+    { key: 'other' as keyof StartupFeesType, label: 'Other Fees', placeholder: 'Enter other fees' },
+  ];
+
   return (
-    <div>
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">Startup Fees</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            IRB Fee
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
-            <input
-              type="number"
-              value={fees.irbFee || ''}
-              onChange={(e) => handleChange('irbFee', e.target.value)}
-              className="w-full pl-8 pr-4 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="0"
-            />
+    <div className="space-y-6">
+      <h3 className="text-lg font-semibold text-white">Startup Fees</h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {inputFields.map(({ key, label, placeholder }) => (
+          <div key={key} className="group">
+            <label className="block text-sm font-medium text-blue-200 mb-3">
+              {label}
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-300 text-lg font-semibold">$</span>
+              <input
+                type="number"
+                value={fees[key] || ''}
+                onChange={(e) => handleChange(key, e.target.value)}
+                className="w-full pl-10 pr-4 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-200 group-hover:bg-white/15"
+                placeholder={placeholder}
+              />
+            </div>
           </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            Ethics Fee
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
-            <input
-              type="number"
-              value={fees.ethicsFee || ''}
-              onChange={(e) => handleChange('ethicsFee', e.target.value)}
-              className="w-full pl-8 pr-4 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="0"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            Archiving Fee
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
-            <input
-              type="number"
-              value={fees.archivingFee || ''}
-              onChange={(e) => handleChange('archivingFee', e.target.value)}
-              className="w-full pl-8 pr-4 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="0"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            Pharmacy Fee
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
-            <input
-              type="number"
-              value={fees.pharmacyFee || ''}
-              onChange={(e) => handleChange('pharmacyFee', e.target.value)}
-              className="w-full pl-8 pr-4 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="0"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            Other Fees
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
-            <input
-              type="number"
-              value={fees.other || ''}
-              onChange={(e) => handleChange('other', e.target.value)}
-              className="w-full pl-8 pr-4 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="0"
-            />
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
