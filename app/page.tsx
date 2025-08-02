@@ -12,7 +12,6 @@ import {
   Upload,
   Plus,
   Trash2,
-  Edit3,
   Building2
 } from 'lucide-react';
 import type { BudgetData, Visit, CustomRevenueItem, PersonnelReimbursement, StartupFeeItem } from '@/types/budget';

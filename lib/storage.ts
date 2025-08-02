@@ -31,7 +31,44 @@ export const loadBudgetData = (): BudgetData => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      const data = JSON.parse(stored);
+      
+      // Migration: Convert old object-based startupFees to array format
+      if (data.startupFees && !Array.isArray(data.startupFees)) {
+        const oldStartupFees = data.startupFees;
+        data.startupFees = [
+          { id: '1', name: 'IRB Fee', amount: oldStartupFees.irbFee || 0 },
+          { id: '2', name: 'Ethics Committee Fee', amount: oldStartupFees.ethicsCommitteeFee || 0 },
+          { id: '3', name: 'Archiving Fee', amount: oldStartupFees.archivingFee || 0 },
+          { id: '4', name: 'Pharmacy Fee', amount: oldStartupFees.pharmacyFee || 0 },
+        ];
+      }
+      
+      // Migration: Rename personnelCosts to personnelReimbursements
+      if (data.personnelCosts && !data.personnelReimbursements) {
+        data.personnelReimbursements = data.personnelCosts;
+        delete data.personnelCosts;
+      }
+      
+      // Ensure studyInfo exists
+      if (!data.studyInfo) {
+        data.studyInfo = {
+          protocolNumber: '',
+          studyTitle: '',
+          piName: '',
+          studyDate: '',
+          sponsor: '',
+          siteName: '',
+        };
+      }
+      
+      // Ensure arrays exist
+      if (!Array.isArray(data.startupFees)) data.startupFees = defaultBudgetData.startupFees;
+      if (!Array.isArray(data.visits)) data.visits = [];
+      if (!Array.isArray(data.customRevenueItems)) data.customRevenueItems = [];
+      if (!Array.isArray(data.personnelReimbursements)) data.personnelReimbursements = [];
+      
+      return data;
     }
   } catch (error) {
     console.error('Error loading budget data:', error);
