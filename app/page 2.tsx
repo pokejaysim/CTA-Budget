@@ -84,7 +84,8 @@ export default function Home() {
     const newFee: StartupFeeItem = {
       id: Date.now().toString(),
       name: 'New Startup Fee',
-      amount: 0
+      amount: 0,
+      timing: 'oneTime'
     };
     updateBudgetData({ startupFees: [...budgetData.startupFees, newFee] });
   };
@@ -129,7 +130,8 @@ export default function Home() {
       id: Date.now().toString(),
       name: 'New Revenue Item',
       amount: 0,
-      type: 'flat'
+      type: 'flat',
+      timing: 'oneTime'
     };
     updateBudgetData({ customRevenueItems: [...budgetData.customRevenueItems, newItem] });
   };

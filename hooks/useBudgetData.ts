@@ -57,7 +57,8 @@ export const useBudgetData = () => {
     const newFee: StartupFeeItem = {
       id: Date.now().toString(),
       name: 'New Startup Fee',
-      amount: 0
+      amount: 0,
+      timing: 'oneTime'
     };
     updateBudgetData({ startupFees: [...budgetData.startupFees, newFee] });
   }, [budgetData.startupFees, updateBudgetData]);
@@ -102,7 +103,8 @@ export const useBudgetData = () => {
       id: Date.now().toString(),
       name: 'New Revenue Item',
       amount: 0,
-      type: 'flat'
+      type: 'flat',
+      timing: 'oneTime'
     };
     updateBudgetData({ customRevenueItems: [...budgetData.customRevenueItems, newItem] });
   }, [budgetData.customRevenueItems, updateBudgetData]);

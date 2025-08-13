@@ -20,10 +20,10 @@ export const defaultBudgetData: BudgetData = {
     siteName: '',
   },
   startupFees: [
-    { id: '1', name: 'IRB Fee', amount: 0 },
-    { id: '2', name: 'Ethics Committee Fee', amount: 0 },
-    { id: '3', name: 'Archiving Fee', amount: 0 },
-    { id: '4', name: 'Pharmacy Fee', amount: 0 },
+    { id: '1', name: 'IRB Fee', amount: 0, timing: 'oneTime' as const },
+    { id: '2', name: 'Ethics Committee Fee', amount: 0, timing: 'oneTime' as const },
+    { id: '3', name: 'Archiving Fee', amount: 0, timing: 'oneTime' as const },
+    { id: '4', name: 'Pharmacy Fee', amount: 0, timing: 'oneTime' as const },
   ],
   visits: [],
   overhead: 30,
@@ -62,10 +62,10 @@ const migrateAndNormalizeBudgetData = (data: any): BudgetData => {
   if (data.startupFees && !Array.isArray(data.startupFees)) {
     const oldStartupFees = data.startupFees;
     data.startupFees = [
-      { id: '1', name: 'IRB Fee', amount: oldStartupFees.irbFee || 0 },
-      { id: '2', name: 'Ethics Committee Fee', amount: oldStartupFees.ethicsCommitteeFee || 0 },
-      { id: '3', name: 'Archiving Fee', amount: oldStartupFees.archivingFee || 0 },
-      { id: '4', name: 'Pharmacy Fee', amount: oldStartupFees.pharmacyFee || 0 },
+      { id: '1', name: 'IRB Fee', amount: oldStartupFees.irbFee || 0, timing: 'oneTime' as const },
+      { id: '2', name: 'Ethics Committee Fee', amount: oldStartupFees.ethicsCommitteeFee || 0, timing: 'oneTime' as const },
+      { id: '3', name: 'Archiving Fee', amount: oldStartupFees.archivingFee || 0, timing: 'oneTime' as const },
+      { id: '4', name: 'Pharmacy Fee', amount: oldStartupFees.pharmacyFee || 0, timing: 'oneTime' as const },
     ];
   }
   
@@ -95,6 +95,23 @@ const migrateAndNormalizeBudgetData = (data: any): BudgetData => {
   data.overhead = typeof data.overhead === 'number' ? data.overhead : 30;
   data.targetEnrollment = typeof data.targetEnrollment === 'number' ? data.targetEnrollment : 0;
   data.notes = typeof data.notes === 'string' ? data.notes : '';
+  
+  // Migration: Add timing field to existing items
+  if (data.startupFees) {
+    data.startupFees = data.startupFees.map((fee: any) => ({
+      ...fee,
+      timing: fee.timing || 'oneTime',
+      estimatedOccurrences: fee.estimatedOccurrences || undefined
+    }));
+  }
+  
+  if (data.customRevenueItems) {
+    data.customRevenueItems = data.customRevenueItems.map((item: any) => ({
+      ...item,
+      timing: item.timing || 'oneTime',
+      estimatedOccurrences: item.estimatedOccurrences || undefined
+    }));
+  }
   
   return data as BudgetData;
 };

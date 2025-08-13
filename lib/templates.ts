@@ -21,22 +21,13 @@ export const defaultTemplates: BudgetTemplate[] = [
     isDefault: true,
     createdAt: new Date().toISOString(),
     data: {
-      ...defaultBudgetData,
-      studyInfo: {
-        protocolNumber: '',
-        studyTitle: '',
-        piName: '',
-        studyDate: '',
-        sponsor: '',
-        siteName: '',
-      },
       targetEnrollment: 30,
       overhead: 25,
       startupFees: [
-        { id: '1', name: 'IRB Review Fee', amount: 5000 },
-        { id: '2', name: 'Contract Negotiation', amount: 3000 },
-        { id: '3', name: 'Site Initiation', amount: 8000 },
-        { id: '4', name: 'Pharmacy Setup', amount: 4000 },
+        { id: '1', name: 'IRB Review Fee', amount: 5000, timing: 'oneTime' as const },
+        { id: '2', name: 'Contract Negotiation', amount: 3000, timing: 'oneTime' as const },
+        { id: '3', name: 'Site Initiation', amount: 8000, timing: 'oneTime' as const },
+        { id: '4', name: 'Pharmacy Setup', amount: 4000, timing: 'oneTime' as const },
       ],
       visits: [
         { id: '1', name: 'Screening Visit', paymentPerVisit: 1200 },
@@ -46,8 +37,8 @@ export const defaultTemplates: BudgetTemplate[] = [
         { id: '5', name: 'End of Treatment', paymentPerVisit: 1500 },
       ],
       customRevenueItems: [
-        { id: '1', name: 'SAE Reporting', amount: 500, type: 'perPatient' },
-        { id: '2', name: 'Biomarker Analysis', amount: 2000, type: 'perPatient' },
+        { id: '1', name: 'SAE Reporting', amount: 500, type: 'perPatient' as const, timing: 'oneTime' as const },
+        { id: '2', name: 'Biomarker Analysis', amount: 2000, type: 'perPatient' as const, timing: 'oneTime' as const },
       ],
       personnelReimbursements: [
         { id: '1', role: 'Study Coordinator', type: 'perPatient', hourlyRate: 65, hours: 8 },
@@ -65,22 +56,13 @@ export const defaultTemplates: BudgetTemplate[] = [
     isDefault: true,
     createdAt: new Date().toISOString(),
     data: {
-      ...defaultBudgetData,
-      studyInfo: {
-        protocolNumber: '',
-        studyTitle: '',
-        piName: '',
-        studyDate: '',
-        sponsor: '',
-        siteName: '',
-      },
       targetEnrollment: 120,
       overhead: 30,
       startupFees: [
-        { id: '1', name: 'IRB Review Fee', amount: 6000 },
-        { id: '2', name: 'Site Qualification', amount: 5000 },
-        { id: '3', name: 'Equipment Training', amount: 4000 },
-        { id: '4', name: 'Central Lab Setup', amount: 3500 },
+        { id: '1', name: 'IRB Review Fee', amount: 6000, timing: 'oneTime' as const },
+        { id: '2', name: 'Site Qualification', amount: 5000, timing: 'oneTime' as const },
+        { id: '3', name: 'Equipment Training', amount: 4000, timing: 'oneTime' as const },
+        { id: '4', name: 'Central Lab Setup', amount: 3500, timing: 'oneTime' as const },
       ],
       visits: [
         { id: '1', name: 'Screening/Baseline', paymentPerVisit: 1500 },
@@ -91,9 +73,9 @@ export const defaultTemplates: BudgetTemplate[] = [
         { id: '6', name: 'Week 52 Follow-up', paymentPerVisit: 1200 },
       ],
       customRevenueItems: [
-        { id: '1', name: 'Echocardiogram Reading', amount: 300, type: 'perPatient' },
-        { id: '2', name: 'ECG Central Reading', amount: 150, type: 'perVisit' },
-        { id: '3', name: 'Device Training', amount: 8000, type: 'flat' },
+        { id: '1', name: 'Echocardiogram Reading', amount: 300, type: 'perPatient' as const, timing: 'oneTime' as const },
+        { id: '2', name: 'ECG Central Reading', amount: 150, type: 'perVisit' as const, timing: 'perVisit' as const },
+        { id: '3', name: 'Device Training', amount: 8000, type: 'flat' as const, timing: 'oneTime' as const },
       ],
       personnelReimbursements: [
         { id: '1', role: 'Study Coordinator', type: 'perPatient', hourlyRate: 70, hours: 6 },
@@ -112,22 +94,13 @@ export const defaultTemplates: BudgetTemplate[] = [
     isDefault: true,
     createdAt: new Date().toISOString(),
     data: {
-      ...defaultBudgetData,
-      studyInfo: {
-        protocolNumber: '',
-        studyTitle: '',
-        piName: '',
-        studyDate: '',
-        sponsor: '',
-        siteName: '',
-      },
       targetEnrollment: 200,
       overhead: 28,
       startupFees: [
-        { id: '1', name: 'IRB Review Fee', amount: 8000 },
-        { id: '2', name: 'Site Initiation Visit', amount: 12000 },
-        { id: '3', name: 'Lab Certification', amount: 4000 },
-        { id: '4', name: 'Staff Training', amount: 6000 },
+        { id: '1', name: 'IRB Review Fee', amount: 8000, timing: 'oneTime' as const },
+        { id: '2', name: 'Site Initiation Visit', amount: 12000, timing: 'oneTime' as const },
+        { id: '3', name: 'Lab Certification', amount: 4000, timing: 'oneTime' as const },
+        { id: '4', name: 'Staff Training', amount: 6000, timing: 'oneTime' as const },
       ],
       visits: [
         { id: '1', name: 'Screening Visit', paymentPerVisit: 800 },
@@ -139,9 +112,9 @@ export const defaultTemplates: BudgetTemplate[] = [
         { id: '7', name: 'Final Visit', paymentPerVisit: 700 },
       ],
       customRevenueItems: [
-        { id: '1', name: 'HbA1c Testing', amount: 50, type: 'perVisit' },
-        { id: '2', name: 'Glucose Monitoring', amount: 200, type: 'perPatient' },
-        { id: '3', name: 'MACE Adjudication', amount: 300, type: 'perPatient' },
+        { id: '1', name: 'HbA1c Testing', amount: 50, type: 'perVisit' as const, timing: 'perVisit' as const },
+        { id: '2', name: 'Glucose Monitoring', amount: 200, type: 'perPatient' as const, timing: 'oneTime' as const },
+        { id: '3', name: 'MACE Adjudication', amount: 300, type: 'perPatient' as const, timing: 'asNeeded' as const, estimatedOccurrences: 2 },
       ],
       personnelReimbursements: [
         { id: '1', role: 'Study Coordinator', type: 'perPatient', hourlyRate: 75, hours: 4 },
@@ -160,21 +133,12 @@ export const defaultTemplates: BudgetTemplate[] = [
     isDefault: true,
     createdAt: new Date().toISOString(),
     data: {
-      ...defaultBudgetData,
-      studyInfo: {
-        protocolNumber: '',
-        studyTitle: '',
-        piName: '',
-        studyDate: '',
-        sponsor: '',
-        siteName: '',
-      },
       targetEnrollment: 300,
       overhead: 20,
       startupFees: [
-        { id: '1', name: 'IRB Review Fee', amount: 3000 },
-        { id: '2', name: 'Site Setup', amount: 2500 },
-        { id: '3', name: 'Database Access', amount: 2000 },
+        { id: '1', name: 'IRB Review Fee', amount: 3000, timing: 'oneTime' as const },
+        { id: '2', name: 'Site Setup', amount: 2500, timing: 'oneTime' as const },
+        { id: '3', name: 'Database Access', amount: 2000, timing: 'oneTime' as const },
       ],
       visits: [
         { id: '1', name: 'Enrollment Visit', paymentPerVisit: 300 },
@@ -182,8 +146,8 @@ export const defaultTemplates: BudgetTemplate[] = [
         { id: '3', name: '12-Month Follow-up', paymentPerVisit: 200 },
       ],
       customRevenueItems: [
-        { id: '1', name: 'Chart Review', amount: 100, type: 'perPatient' },
-        { id: '2', name: 'Phone Follow-up', amount: 50, type: 'perPatient' },
+        { id: '1', name: 'Chart Review', amount: 100, type: 'perPatient' as const, timing: 'oneTime' as const },
+        { id: '2', name: 'Phone Follow-up', amount: 50, type: 'perPatient' as const, timing: 'asNeeded' as const, estimatedOccurrences: 3 },
       ],
       personnelReimbursements: [
         { id: '1', role: 'Study Coordinator', type: 'perPatient', hourlyRate: 60, hours: 2 },

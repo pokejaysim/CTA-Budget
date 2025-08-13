@@ -87,7 +87,7 @@ export const exportBudgetToPDF = async (
 
   budgetSummary.forEach(([label, amount], index) => {
     const isTotal = index === budgetSummary.length - 1;
-    const isSubtotal = label === 'Subtotal' || label.includes('Overhead');
+    const isSubtotal = label === 'Subtotal' || (typeof label === 'string' && label.includes('Overhead'));
     
     if (isSubtotal) {
       yPosition += 2;
@@ -103,7 +103,7 @@ export const exportBudgetToPDF = async (
       pdf.setFontSize(10);
     }
     
-    pdf.text(label, margin, yPosition);
+    pdf.text(String(label), margin, yPosition);
     pdf.text(`$${(amount as number).toLocaleString()}`, pageWidth - margin - 30, yPosition, { align: 'right' });
     yPosition += isTotal ? 8 : 5;
   });

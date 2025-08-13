@@ -13,7 +13,21 @@ export interface BudgetCalculations {
 
 export const useBudgetCalculations = (budgetData: BudgetData): BudgetCalculations => {
   return useMemo(() => {
-    const totalStartupFees = budgetData.startupFees.reduce((sum, fee) => sum + fee.amount, 0);
+    const totalStartupFees = budgetData.startupFees.reduce((sum, fee) => {
+      let amount = fee.amount;
+      
+      if (fee.timing === 'oneTime') {
+        // One-time fee: amount as is
+        return sum + amount;
+      } else if (fee.timing === 'perVisit') {
+        // Per-visit fee: amount × total visits × target enrollment
+        return sum + (amount * budgetData.visits.length * budgetData.targetEnrollment);
+      } else if (fee.timing === 'asNeeded') {
+        // As-needed fee: amount × estimated occurrences
+        return sum + (amount * (fee.estimatedOccurrences || 1));
+      }
+      return sum + amount;
+    }, 0);
     
     const totalVisitRevenue = budgetData.visits.reduce(
       (sum, visit) => sum + (visit.paymentPerVisit * budgetData.targetEnrollment), 
@@ -21,10 +35,28 @@ export const useBudgetCalculations = (budgetData: BudgetData): BudgetCalculation
     );
     
     const totalCustomRevenue = budgetData.customRevenueItems.reduce((sum, item) => {
-      if (item.type === 'flat') return sum + item.amount;
-      if (item.type === 'perPatient') return sum + (item.amount * budgetData.targetEnrollment);
-      if (item.type === 'perVisit') return sum + (item.amount * budgetData.visits.length * budgetData.targetEnrollment);
-      return sum;
+      let baseAmount = 0;
+      
+      // Calculate base amount based on type
+      if (item.type === 'flat') {
+        baseAmount = item.amount;
+      } else if (item.type === 'perPatient') {
+        baseAmount = item.amount * budgetData.targetEnrollment;
+      } else if (item.type === 'perVisit') {
+        baseAmount = item.amount * budgetData.visits.length * budgetData.targetEnrollment;
+      }
+      
+      // Apply timing multiplier
+      if (item.timing === 'oneTime') {
+        return sum + baseAmount;
+      } else if (item.timing === 'perVisit') {
+        // For custom revenue, per-visit timing means multiply by visits again
+        return sum + (baseAmount * budgetData.visits.length);
+      } else if (item.timing === 'asNeeded') {
+        return sum + (baseAmount * (item.estimatedOccurrences || 1));
+      }
+      
+      return sum + baseAmount;
     }, 0);
     
     const totalPersonnelReimbursements = budgetData.personnelReimbursements.reduce((sum, cost) => {

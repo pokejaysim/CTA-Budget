@@ -6,6 +6,8 @@ import { ValidatedInput, ValidatedSelect } from './ValidatedInput';
 // Import schemas instead of validation functions
 const nameSchema = z.string().min(1, 'Name is required').max(200, 'Name is too long').trim();
 const amountSchema = z.number().min(0, 'Amount must be non-negative').max(99999999, 'Amount is too large').finite('Amount must be a valid number');
+const timingSchema = z.enum(['oneTime', 'perVisit', 'asNeeded']);
+const occurrencesSchema = z.number().min(1, 'Must be at least 1').max(999, 'Too many occurrences');
 
 interface CostSectionProps {
   title: string;
@@ -85,6 +87,30 @@ const StartupFeeFields: React.FC<{ item: StartupFeeItem; onUpdate: (id: string, 
       schema={nameSchema}
       fieldName={`startupFee-${item.id}-name`}
     />
+    <ValidatedSelect
+      value={item.timing}
+      onChange={(value) => onUpdate(item.id, { timing: value, estimatedOccurrences: value === 'asNeeded' ? 1 : undefined })}
+      options={[
+        { value: 'oneTime', label: 'One-time' },
+        { value: 'perVisit', label: 'Per Visit' },
+        { value: 'asNeeded', label: 'As Needed' }
+      ]}
+      schema={timingSchema}
+      fieldName={`startupFee-${item.id}-timing`}
+    />
+    {item.timing === 'asNeeded' && (
+      <ValidatedInput
+        type="number"
+        placeholder="Occurrences"
+        value={item.estimatedOccurrences || 1}
+        onChange={(value) => onUpdate(item.id, { estimatedOccurrences: Number(value) })}
+        onFocus={(e) => e.target.select()}
+        className="w-20"
+        schema={occurrencesSchema}
+        fieldName={`startupFee-${item.id}-occurrences`}
+        showSuccess
+      />
+    )}
     <ValidatedInput
       type="number"
       placeholder="Amount"
@@ -96,6 +122,17 @@ const StartupFeeFields: React.FC<{ item: StartupFeeItem; onUpdate: (id: string, 
       fieldName={`startupFee-${item.id}-amount`}
       showSuccess
     />
+    <div className="flex items-center">
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+        item.timing === 'oneTime' ? 'bg-blue-100 text-blue-800' :
+        item.timing === 'perVisit' ? 'bg-green-100 text-green-800' :
+        'bg-orange-100 text-orange-800'
+      }`}>
+        {item.timing === 'oneTime' ? 'One-time' :
+         item.timing === 'perVisit' ? 'Per Visit' :
+         `As Needed (${item.estimatedOccurrences || 1}x)`}
+      </span>
+    </div>
   </>
 );
 
@@ -148,6 +185,30 @@ const CustomRevenueFields: React.FC<{ item: CustomRevenueItem; onUpdate: (id: st
       schema={customRevenueTypeSchema}
       fieldName={`customRevenue-${item.id}-type`}
     />
+    <ValidatedSelect
+      value={item.timing}
+      onChange={(value) => onUpdate(item.id, { timing: value, estimatedOccurrences: value === 'asNeeded' ? 1 : undefined })}
+      options={[
+        { value: 'oneTime', label: 'One-time' },
+        { value: 'perVisit', label: 'Per Visit' },
+        { value: 'asNeeded', label: 'As Needed' }
+      ]}
+      schema={timingSchema}
+      fieldName={`customRevenue-${item.id}-timing`}
+    />
+    {item.timing === 'asNeeded' && (
+      <ValidatedInput
+        type="number"
+        placeholder="Occurrences"
+        value={item.estimatedOccurrences || 1}
+        onChange={(value) => onUpdate(item.id, { estimatedOccurrences: Number(value) })}
+        onFocus={(e) => e.target.select()}
+        className="w-20"
+        schema={occurrencesSchema}
+        fieldName={`customRevenue-${item.id}-occurrences`}
+        showSuccess
+      />
+    )}
     <ValidatedInput
       type="number"
       placeholder="Amount"
@@ -159,6 +220,17 @@ const CustomRevenueFields: React.FC<{ item: CustomRevenueItem; onUpdate: (id: st
       fieldName={`customRevenue-${item.id}-amount`}
       showSuccess
     />
+    <div className="flex items-center">
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+        item.timing === 'oneTime' ? 'bg-blue-100 text-blue-800' :
+        item.timing === 'perVisit' ? 'bg-green-100 text-green-800' :
+        'bg-orange-100 text-orange-800'
+      }`}>
+        {item.timing === 'oneTime' ? 'One-time' :
+         item.timing === 'perVisit' ? 'Per Visit' :
+         `As Needed (${item.estimatedOccurrences || 1}x)`}
+      </span>
+    </div>
   </>
 );
 

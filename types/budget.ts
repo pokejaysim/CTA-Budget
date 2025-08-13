@@ -2,6 +2,8 @@ export interface StartupFeeItem {
   id: string;
   name: string;
   amount: number;
+  timing: 'oneTime' | 'perVisit' | 'asNeeded';
+  estimatedOccurrences?: number;
 }
 
 export interface StudyInfo {
@@ -24,6 +26,8 @@ export interface CustomRevenueItem {
   name: string;
   amount: number;
   type: 'flat' | 'perPatient' | 'perVisit';
+  timing: 'oneTime' | 'perVisit' | 'asNeeded';
+  estimatedOccurrences?: number;
 }
 
 export interface PersonnelReimbursement {

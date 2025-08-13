@@ -167,7 +167,7 @@ export const exportBudgetToExcel = async (
   // For Excel export, we'll use a more structured approach
   // This creates an Excel-compatible CSV with better formatting
   
-  const excelData = [];
+  const excelData: any[][] = [];
   const addRow = (data: any[], style?: string) => {
     excelData.push(data);
   };
