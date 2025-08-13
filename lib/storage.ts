@@ -1,8 +1,16 @@
 import { BudgetData } from '@/types/budget';
 
 const STORAGE_KEY = 'ctaBudget';
+const BACKUP_KEY = 'ctaBudget_backup';
+const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB limit
 
-const defaultBudgetData: BudgetData = {
+export interface StorageError {
+  type: 'QUOTA_EXCEEDED' | 'PARSE_ERROR' | 'NOT_FOUND' | 'INVALID_DATA' | 'UNKNOWN';
+  message: string;
+  originalError?: Error;
+}
+
+export const defaultBudgetData: BudgetData = {
   studyInfo: {
     protocolNumber: '',
     studyTitle: '',
@@ -25,64 +33,222 @@ const defaultBudgetData: BudgetData = {
   notes: '',
 };
 
-export const loadBudgetData = (): BudgetData => {
-  if (typeof window === 'undefined') return defaultBudgetData;
+const validateBudgetData = (data: any): data is BudgetData => {
+  if (!data || typeof data !== 'object') return false;
+  
+  // Check required properties exist
+  const requiredFields = ['startupFees', 'visits', 'customRevenueItems', 'personnelReimbursements'];
+  if (!requiredFields.every(field => field in data)) return false;
+  
+  // Validate arrays
+  if (!Array.isArray(data.startupFees) || 
+      !Array.isArray(data.visits) || 
+      !Array.isArray(data.customRevenueItems) || 
+      !Array.isArray(data.personnelReimbursements)) {
+    return false;
+  }
+  
+  // Validate overhead is a number
+  if (typeof data.overhead !== 'number' || data.overhead < 0) return false;
+  
+  // Validate targetEnrollment is a number
+  if (typeof data.targetEnrollment !== 'number' || data.targetEnrollment < 0) return false;
+  
+  return true;
+};
+
+const migrateAndNormalizeBudgetData = (data: any): BudgetData => {
+  // Migration: Convert old object-based startupFees to array format
+  if (data.startupFees && !Array.isArray(data.startupFees)) {
+    const oldStartupFees = data.startupFees;
+    data.startupFees = [
+      { id: '1', name: 'IRB Fee', amount: oldStartupFees.irbFee || 0 },
+      { id: '2', name: 'Ethics Committee Fee', amount: oldStartupFees.ethicsCommitteeFee || 0 },
+      { id: '3', name: 'Archiving Fee', amount: oldStartupFees.archivingFee || 0 },
+      { id: '4', name: 'Pharmacy Fee', amount: oldStartupFees.pharmacyFee || 0 },
+    ];
+  }
+  
+  // Migration: Rename personnelCosts to personnelReimbursements
+  if (data.personnelCosts && !data.personnelReimbursements) {
+    data.personnelReimbursements = data.personnelCosts;
+    delete data.personnelCosts;
+  }
+  
+  // Ensure studyInfo exists
+  if (!data.studyInfo) {
+    data.studyInfo = {
+      protocolNumber: '',
+      studyTitle: '',
+      piName: '',
+      studyDate: '',
+      sponsor: '',
+      siteName: '',
+    };
+  }
+  
+  // Ensure all required fields exist with defaults
+  data.startupFees = Array.isArray(data.startupFees) ? data.startupFees : defaultBudgetData.startupFees;
+  data.visits = Array.isArray(data.visits) ? data.visits : [];
+  data.customRevenueItems = Array.isArray(data.customRevenueItems) ? data.customRevenueItems : [];
+  data.personnelReimbursements = Array.isArray(data.personnelReimbursements) ? data.personnelReimbursements : [];
+  data.overhead = typeof data.overhead === 'number' ? data.overhead : 30;
+  data.targetEnrollment = typeof data.targetEnrollment === 'number' ? data.targetEnrollment : 0;
+  data.notes = typeof data.notes === 'string' ? data.notes : '';
+  
+  return data as BudgetData;
+};
+
+export const loadBudgetData = (): { data: BudgetData; error?: StorageError } => {
+  if (typeof window === 'undefined') return { data: defaultBudgetData };
   
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const data = JSON.parse(stored);
-      
-      // Migration: Convert old object-based startupFees to array format
-      if (data.startupFees && !Array.isArray(data.startupFees)) {
-        const oldStartupFees = data.startupFees;
-        data.startupFees = [
-          { id: '1', name: 'IRB Fee', amount: oldStartupFees.irbFee || 0 },
-          { id: '2', name: 'Ethics Committee Fee', amount: oldStartupFees.ethicsCommitteeFee || 0 },
-          { id: '3', name: 'Archiving Fee', amount: oldStartupFees.archivingFee || 0 },
-          { id: '4', name: 'Pharmacy Fee', amount: oldStartupFees.pharmacyFee || 0 },
-        ];
-      }
-      
-      // Migration: Rename personnelCosts to personnelReimbursements
-      if (data.personnelCosts && !data.personnelReimbursements) {
-        data.personnelReimbursements = data.personnelCosts;
-        delete data.personnelCosts;
-      }
-      
-      // Ensure studyInfo exists
-      if (!data.studyInfo) {
-        data.studyInfo = {
-          protocolNumber: '',
-          studyTitle: '',
-          piName: '',
-          studyDate: '',
-          sponsor: '',
-          siteName: '',
+    if (!stored) {
+      return { data: defaultBudgetData };
+    }
+    
+    let parsedData;
+    try {
+      parsedData = JSON.parse(stored);
+    } catch (parseError) {
+      // Try to load from backup
+      const backup = localStorage.getItem(BACKUP_KEY);
+      if (backup) {
+        try {
+          parsedData = JSON.parse(backup);
+          console.warn('Loaded from backup due to corrupted main data');
+        } catch (_backupError) {
+          return { 
+            data: defaultBudgetData, 
+            error: { 
+              type: 'PARSE_ERROR', 
+              message: 'Both main and backup data are corrupted',
+              originalError: parseError as Error
+            }
+          };
+        }
+      } else {
+        return { 
+          data: defaultBudgetData, 
+          error: { 
+            type: 'PARSE_ERROR', 
+            message: 'Stored data is corrupted and no backup exists',
+            originalError: parseError as Error
+          }
         };
       }
-      
-      // Ensure arrays exist
-      if (!Array.isArray(data.startupFees)) data.startupFees = defaultBudgetData.startupFees;
-      if (!Array.isArray(data.visits)) data.visits = [];
-      if (!Array.isArray(data.customRevenueItems)) data.customRevenueItems = [];
-      if (!Array.isArray(data.personnelReimbursements)) data.personnelReimbursements = [];
-      
-      return data;
     }
+    
+    const migratedData = migrateAndNormalizeBudgetData(parsedData);
+    
+    if (!validateBudgetData(migratedData)) {
+      return { 
+        data: defaultBudgetData, 
+        error: { 
+          type: 'INVALID_DATA', 
+          message: 'Stored data failed validation checks'
+        }
+      };
+    }
+    
+    return { data: migratedData };
+    
   } catch (error) {
-    console.error('Error loading budget data:', error);
+    return { 
+      data: defaultBudgetData, 
+      error: { 
+        type: 'UNKNOWN', 
+        message: 'Unexpected error loading budget data',
+        originalError: error as Error
+      }
+    };
   }
-  return defaultBudgetData;
 };
 
-export const saveBudgetData = (data: BudgetData): void => {
-  if (typeof window === 'undefined') return;
+const checkStorageQuota = (): Promise<boolean> => {
+  if (typeof navigator === 'undefined' || !navigator.storage || !navigator.storage.estimate) {
+    return Promise.resolve(true); // Can't check, assume it's fine
+  }
+  
+  return navigator.storage.estimate().then(estimate => {
+    const usedSpace = estimate.usage || 0;
+    const totalSpace = estimate.quota || 0;
+    
+    return usedSpace < totalSpace * 0.8; // Use less than 80% of available space
+  }).catch(() => true); // If estimate fails, assume it's fine
+};
+
+export const saveBudgetData = (data: BudgetData): { success: boolean; error?: StorageError } => {
+  if (typeof window === 'undefined') return { success: false, error: { type: 'UNKNOWN', message: 'Not in browser environment' } };
+  
+  if (!validateBudgetData(data)) {
+    return { 
+      success: false, 
+      error: { 
+        type: 'INVALID_DATA', 
+        message: 'Budget data failed validation before saving' 
+      } 
+    };
+  }
   
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const dataString = JSON.stringify(data);
+    
+    // Check size before saving
+    if (dataString.length > MAX_STORAGE_SIZE) {
+      return { 
+        success: false, 
+        error: { 
+          type: 'QUOTA_EXCEEDED', 
+          message: 'Data is too large to store' 
+        } 
+      };
+    }
+    
+    // Create backup of current data before overwriting
+    const currentData = localStorage.getItem(STORAGE_KEY);
+    if (currentData) {
+      try {
+        localStorage.setItem(BACKUP_KEY, currentData);
+      } catch (backupError) {
+        console.warn('Failed to create backup:', backupError);
+      }
+    }
+    
+    // Save new data
+    localStorage.setItem(STORAGE_KEY, dataString);
+    return { success: true };
+    
   } catch (error) {
-    console.error('Error saving budget data:', error);
+    const err = error as Error;
+    
+    if (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+      // Try to clear backup and retry
+      try {
+        localStorage.removeItem(BACKUP_KEY);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        return { success: true };
+      } catch (_retryError) {
+        return { 
+          success: false, 
+          error: { 
+            type: 'QUOTA_EXCEEDED', 
+            message: 'Storage quota exceeded. Consider exporting your data.',
+            originalError: err
+          } 
+        };
+      }
+    }
+    
+    return { 
+      success: false, 
+      error: { 
+        type: 'UNKNOWN', 
+        message: 'Failed to save budget data',
+        originalError: err
+      } 
+    };
   }
 };
 
@@ -99,18 +265,137 @@ export const exportBudgetData = (data: BudgetData): void => {
   URL.revokeObjectURL(url);
 };
 
-export const importBudgetData = (file: File): Promise<BudgetData> => {
-  return new Promise((resolve, reject) => {
+export const importBudgetData = (file: File): Promise<{ data: BudgetData; error?: StorageError }> => {
+  return new Promise((resolve) => {
+    // Validate file type
+    if (!file.name.toLowerCase().endsWith('.json')) {
+      resolve({
+        data: defaultBudgetData,
+        error: {
+          type: 'INVALID_DATA',
+          message: 'Please select a valid JSON file'
+        }
+      });
+      return;
+    }
+    
+    // Validate file size
+    if (file.size > MAX_STORAGE_SIZE) {
+      resolve({
+        data: defaultBudgetData,
+        error: {
+          type: 'QUOTA_EXCEEDED',
+          message: 'File is too large to import'
+        }
+      });
+      return;
+    }
+    
     const reader = new FileReader();
+    
     reader.onload = (e) => {
       try {
-        const data = JSON.parse(e.target?.result as string);
-        resolve(data);
+        const result = e.target?.result;
+        if (typeof result !== 'string') {
+          resolve({
+            data: defaultBudgetData,
+            error: {
+              type: 'INVALID_DATA',
+              message: 'Unable to read file contents'
+            }
+          });
+          return;
+        }
+        
+        let parsedData;
+        try {
+          parsedData = JSON.parse(result);
+        } catch (parseError) {
+          resolve({
+            data: defaultBudgetData,
+            error: {
+              type: 'PARSE_ERROR',
+              message: 'Invalid JSON format in file',
+              originalError: parseError as Error
+            }
+          });
+          return;
+        }
+        
+        // Sanitize and validate the data
+        const sanitizedData = sanitizeImportedData(parsedData);
+        const normalizedData = migrateAndNormalizeBudgetData(sanitizedData);
+        
+        if (!validateBudgetData(normalizedData)) {
+          resolve({
+            data: defaultBudgetData,
+            error: {
+              type: 'INVALID_DATA',
+              message: 'File does not contain valid budget data'
+            }
+          });
+          return;
+        }
+        
+        resolve({ data: normalizedData });
+        
       } catch (error) {
-        reject(error);
+        resolve({
+          data: defaultBudgetData,
+          error: {
+            type: 'UNKNOWN',
+            message: 'Unexpected error reading file',
+            originalError: error as Error
+          }
+        });
       }
     };
-    reader.onerror = reject;
+    
+    reader.onerror = () => {
+      resolve({
+        data: defaultBudgetData,
+        error: {
+          type: 'UNKNOWN',
+          message: 'Failed to read file'
+        }
+      });
+    };
+    
     reader.readAsText(file);
   });
+};
+
+const sanitizeImportedData = (data: any): any => {
+  if (!data || typeof data !== 'object') return {};
+  
+  // Remove any potentially dangerous properties
+  const sanitized = { ...data };
+  delete sanitized.__proto__;
+  delete sanitized.constructor;
+  
+  // Sanitize strings to prevent XSS
+  const sanitizeString = (str: any): string => {
+    if (typeof str !== 'string') return '';
+    return str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+              .replace(/javascript:/gi, '')
+              .replace(/on\w+=/gi, '');
+  };
+  
+  // Recursively sanitize string values
+  const sanitizeObject = (obj: any): any => {
+    if (Array.isArray(obj)) {
+      return obj.map(sanitizeObject);
+    } else if (obj && typeof obj === 'object') {
+      const result: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        result[key] = sanitizeObject(value);
+      }
+      return result;
+    } else if (typeof obj === 'string') {
+      return sanitizeString(obj);
+    }
+    return obj;
+  };
+  
+  return sanitizeObject(sanitized);
 };

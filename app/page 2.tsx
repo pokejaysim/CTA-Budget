@@ -18,10 +18,16 @@ import type { BudgetData, Visit, CustomRevenueItem, PersonnelReimbursement, Star
 import { loadBudgetData, saveBudgetData, exportBudgetData, importBudgetData } from '@/lib/storage';
 
 export default function Home() {
-  const [budgetData, setBudgetData] = useState<BudgetData>(loadBudgetData());
+  const [budgetData, setBudgetData] = useState<BudgetData>(() => {
+    const { data } = loadBudgetData();
+    return data;
+  });
 
   useEffect(() => {
-    saveBudgetData(budgetData);
+    const result = saveBudgetData(budgetData);
+    if (!result.success && result.error) {
+      console.error('Save failed:', result.error.message);
+    }
   }, [budgetData]);
 
   const updateBudgetData = (updates: Partial<BudgetData>) => {
@@ -64,11 +70,11 @@ export default function Home() {
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      try {
-        const data = await importBudgetData(file);
-        setBudgetData(data);
-      } catch (error) {
-        console.error('Import failed:', error);
+      const result = await importBudgetData(file);
+      if (result.error) {
+        console.error('Import failed:', result.error.message);
+      } else {
+        setBudgetData(result.data);
       }
     }
   };
