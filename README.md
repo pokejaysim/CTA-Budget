@@ -2,6 +2,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 <!-- Last updated: August 13, 2025 - Added fee timing functionality (one-time, per-visit, as-needed) -->
 <!-- Repository corruption fixed and ready for deployment -->
+<!-- Force GitHub sync - timestamp: 2025-08-13T19:42:00Z -->
 
 ## Getting Started
 
