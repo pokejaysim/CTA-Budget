@@ -1,5 +1,7 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+<!-- Last updated: August 13, 2025 - Added fee timing functionality (one-time, per-visit, as-needed) -->
+
 ## Getting Started
 
 First, run the development server:
