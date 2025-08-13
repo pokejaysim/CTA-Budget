@@ -12,21 +12,15 @@ import {
   Upload,
   Building2,
   Save,
-  RotateCcw,
-  Table,
-  Layout
+  RotateCcw
 } from 'lucide-react';
 // Note: BudgetData type is used via hook return types
 import { exportBudgetData, importBudgetData } from '@/lib/storage';
-import { exportBudgetToPDF } from '@/lib/pdfExport';
-import { exportBudgetToCSV, exportBudgetToExcel } from '@/lib/csvExport';
 import { CostSection } from '@/components/CostSection';
 import { useBudgetData } from '@/hooks/useBudgetData';
 import { useBudgetCalculations } from '@/hooks/useBudgetCalculations';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { BudgetBreakdownChart } from '@/components/charts/BudgetBreakdownChart';
 import { RevenueForecastChart } from '@/components/charts/RevenueForecastChart';
-import { TemplatesModal } from '@/components/TemplatesModal';
 
 
 export default function Home() {
@@ -64,24 +58,18 @@ export default function Home() {
   } = useBudgetCalculations(budgetData);
 
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
 
-  // Handle Escape key for modals
+  // Handle Escape key for modal
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (showClearConfirm) {
-          setShowClearConfirm(false);
-        }
-        if (showTemplatesModal) {
-          setShowTemplatesModal(false);
-        }
+      if (e.key === 'Escape' && showClearConfirm) {
+        setShowClearConfirm(false);
       }
     };
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [showClearConfirm, showTemplatesModal]);
+  }, [showClearConfirm]);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -100,42 +88,6 @@ export default function Home() {
     exportBudgetData(budgetData);
   };
 
-  const handlePDFExport = async () => {
-    await exportBudgetToPDF(budgetData, {
-      totalStartupFees,
-      totalVisitRevenue,
-      totalCustomRevenue,
-      totalPersonnelReimbursements,
-      subtotal,
-      overheadAmount,
-      totalRevenue,
-    });
-  };
-
-  const handleCSVExport = () => {
-    exportBudgetToCSV(budgetData, {
-      totalStartupFees,
-      totalVisitRevenue,
-      totalCustomRevenue,
-      totalPersonnelReimbursements,
-      subtotal,
-      overheadAmount,
-      totalRevenue,
-    });
-  };
-
-  const handleExcelExport = async () => {
-    await exportBudgetToExcel(budgetData, {
-      totalStartupFees,
-      totalVisitRevenue,
-      totalCustomRevenue,
-      totalPersonnelReimbursements,
-      subtotal,
-      overheadAmount,
-      totalRevenue,
-    });
-  };
-
   const handleClearAll = () => {
     setShowClearConfirm(true);
   };
@@ -149,118 +101,68 @@ export default function Home() {
     setShowClearConfirm(false);
   };
 
-  const triggerFileInput = () => {
-    const input = document.getElementById('file-import') as HTMLInputElement;
-    input?.click();
-  };
-
-  // Setup keyboard shortcuts
-  const { getShortcutText } = useKeyboardShortcuts({
-    onSave: handleSave,
-    onExportPDF: handlePDFExport,
-    onExportExcel: handleExcelExport,
-    onExportJSON: () => exportBudgetData(budgetData),
-    onTemplates: () => setShowTemplatesModal(true),
-    onClearAll: () => setShowClearConfirm(true),
-    onImport: triggerFileInput,
-  });
-
-  const shortcuts = getShortcutText();
-
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-600 rounded-lg">
-                <Calculator className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <Calculator className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Clinical Trial Budget Forecaster</h1>
-                <p className="text-xs sm:text-sm text-gray-600">Comprehensive clinical trial budget planning</p>
+                <h1 className="text-2xl font-bold text-gray-900">Clinical Trial Budget Forecaster</h1>
+                <p className="text-sm text-gray-600">Comprehensive clinical trial budget planning</p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
-              <button
-                onClick={() => setShowTemplatesModal(true)}
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap"
-                title={`Templates (${shortcuts.templates})`}
-              >
-                <Layout className="w-4 h-4" />
-                <span className="hidden sm:inline">Templates</span>
-              </button>
+            <div className="flex items-center gap-2">
               <button
                 onClick={handleSave}
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap"
-                title={`Save Budget (${shortcuts.save})`}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
               >
                 <Save className="w-4 h-4" />
-                <span className="hidden sm:inline">Save</span>
+                Save Budget
               </button>
-              <div className="flex gap-1">
-                <button
-                  onClick={handlePDFExport}
-                  className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-xs sm:text-sm font-medium border border-red-300 whitespace-nowrap"
-                  title={`Export PDF (${shortcuts.exportPDF})`}
-                >
-                  <FileText className="w-4 h-4" />
-                  <span className="hidden sm:inline">PDF</span>
-                </button>
-                <button
-                  onClick={handleExcelExport}
-                  className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-xs sm:text-sm font-medium border border-green-300 whitespace-nowrap"
-                  title={`Export Excel (${shortcuts.exportExcel})`}
-                >
-                  <Table className="w-4 h-4" />
-                  <span className="hidden sm:inline">Excel</span>
-                </button>
-                <button
-                  onClick={() => exportBudgetData(budgetData)}
-                  className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-xs sm:text-sm font-medium border border-gray-300 whitespace-nowrap"
-                  title={`Export JSON (${shortcuts.exportJSON})`}
-                >
-                  <Download className="w-4 h-4" />
-                  <span className="hidden sm:inline">JSON</span>
-                </button>
-              </div>
-              <label 
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm font-medium cursor-pointer whitespace-nowrap"
-                title={`Import (${shortcuts.import})`}
+              <button
+                onClick={() => exportBudgetData(budgetData)}
+                className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium border border-gray-300"
               >
+                <Download className="w-4 h-4" />
+                Export
+              </button>
+              <label className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer">
                 <Upload className="w-4 h-4" />
-                <span className="hidden sm:inline">Import</span>
-                <input id="file-import" type="file" accept=".json" onChange={handleImport} className="hidden" />
+                Import
+                <input type="file" accept=".json" onChange={handleImport} className="hidden" />
               </label>
               <button
                 onClick={handleClearAll}
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-xs sm:text-sm font-medium border border-red-300 whitespace-nowrap"
-                title={`Clear All (${shortcuts.clearAll})`}
+                className="flex items-center gap-2 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium border border-red-300"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span className="hidden sm:inline">Clear</span>
+                Clear All
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
+          <div className="xl:col-span-2 space-y-8">
             {/* Study Information Header */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <Building2 className="w-5 h-5 text-blue-700" />
                 </div>
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Study Information</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Study Information</h2>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Protocol Number</label>
                   <input
@@ -336,15 +238,15 @@ export default function Home() {
             </div>
 
             {/* Target Enrollment & Overhead */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-gray-100 rounded-lg">
                   <Users className="w-5 h-5 text-gray-700" />
                 </div>
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Study Parameters</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Study Parameters</h2>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Target Enrollment</label>
                   <input
@@ -418,12 +320,12 @@ export default function Home() {
             />
 
             {/* Notes */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-gray-100 rounded-lg">
                   <FileText className="w-5 h-5 text-gray-700" />
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Notes</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Notes</h3>
               </div>
               <textarea
                 value={budgetData.notes}
@@ -435,10 +337,10 @@ export default function Home() {
           </div>
 
           {/* Sidebar Summary */}
-          <div className="space-y-4 lg:space-y-6">
+          <div className="space-y-6">
             {/* Budget Summary */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 lg:sticky lg:top-24">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Budget Summary</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Budget Summary</h3>
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
@@ -502,8 +404,8 @@ export default function Home() {
             />
 
             {/* Quick Stats */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Protocol</span>
@@ -568,14 +470,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* Templates Modal */}
-      <TemplatesModal
-        isOpen={showTemplatesModal}
-        onClose={() => setShowTemplatesModal(false)}
-        onApplyTemplate={updateBudgetData}
-        currentBudgetData={budgetData}
-      />
     </div>
   );
 }
