@@ -250,7 +250,10 @@ export default function Home() {
                   <input
                     type="number"
                     value={budgetData.targetEnrollment}
-                    onChange={(e) => updateBudgetData({ targetEnrollment: Number(e.target.value) })}
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                      updateBudgetData({ targetEnrollment: isNaN(value) ? 0 : value });
+                    }}
                     onFocus={(e) => e.target.select()}
                     className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                     placeholder="Number of patients"
