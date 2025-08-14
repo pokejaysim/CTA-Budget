@@ -272,7 +272,7 @@ const PersonnelFields: React.FC<{ item: PersonnelReimbursement; onUpdate: (id: s
         <ValidatedInput
           type="number"
           placeholder="Rate"
-          value={item.hourlyRate || 0}
+          value={item.hourlyRate}
           onChange={(value) => onUpdate(item.id, { hourlyRate: Number(value) })}
           onFocus={(e) => e.target.select()}
           className="w-20"
@@ -283,7 +283,7 @@ const PersonnelFields: React.FC<{ item: PersonnelReimbursement; onUpdate: (id: s
         <ValidatedInput
           type="number"
           placeholder="Hours"
-          value={item.hours || 0}
+          value={item.hours}
           onChange={(value) => onUpdate(item.id, { hours: Number(value) })}
           onFocus={(e) => e.target.select()}
           className="w-20"
@@ -297,7 +297,7 @@ const PersonnelFields: React.FC<{ item: PersonnelReimbursement; onUpdate: (id: s
         <ValidatedInput
           type="number"
           placeholder="Monthly"
-          value={item.monthlyFee || 0}
+          value={item.monthlyFee}
           onChange={(value) => onUpdate(item.id, { monthlyFee: Number(value) })}
           onFocus={(e) => e.target.select()}
           className="w-24"
@@ -308,7 +308,7 @@ const PersonnelFields: React.FC<{ item: PersonnelReimbursement; onUpdate: (id: s
         <ValidatedInput
           type="number"
           placeholder="Months"
-          value={item.months || 0}
+          value={item.months}
           onChange={(value) => onUpdate(item.id, { months: Number(value) })}
           onFocus={(e) => e.target.select()}
           className="w-20"

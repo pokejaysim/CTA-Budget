@@ -37,8 +37,8 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
   const isValid = validation && validation.isValid;
 
   useEffect(() => {
-    // For number inputs, show empty string when value is 0
-    if (type === 'number' && value === 0) {
+    // For number inputs, show empty string when value is 0, undefined, null, or NaN
+    if (type === 'number' && (value === 0 || value === undefined || value === null || Number.isNaN(value))) {
       setLocalValue('');
     } else {
       setLocalValue(value);
