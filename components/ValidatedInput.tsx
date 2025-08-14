@@ -41,8 +41,8 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
   }, [value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = type === 'number' ? Number(e.target.value) : e.target.value;
-    setLocalValue(newValue);
+    const rawValue = e.target.value;
+    setLocalValue(rawValue);
     
     // Clear previous timer
     if (validationTimer) {
@@ -51,8 +51,9 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
     
     // Set new timer for debounced validation
     const timer = setTimeout(() => {
-      validateField(fieldName, newValue, schema);
-      onChange(newValue);
+      const valueForValidation = type === 'number' ? Number(rawValue) : rawValue;
+      validateField(fieldName, valueForValidation, schema);
+      onChange(valueForValidation);
     }, debounceMs);
     
     setValidationTimer(timer);
@@ -63,8 +64,9 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
     if (validationTimer) {
       clearTimeout(validationTimer);
     }
-    validateField(fieldName, localValue, schema);
-    onChange(localValue);
+    const valueForValidation = type === 'number' ? Number(localValue) : localValue;
+    validateField(fieldName, valueForValidation, schema);
+    onChange(valueForValidation);
   };
 
   // Cleanup timer on unmount
