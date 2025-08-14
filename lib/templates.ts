@@ -1,5 +1,4 @@
 import type { BudgetData } from '@/types/budget';
-import { defaultBudgetData } from './storage';
 
 export interface BudgetTemplate {
   id: string;

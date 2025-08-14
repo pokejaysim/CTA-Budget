@@ -169,6 +169,7 @@ export const exportBudgetToExcel = async (
   
   const excelData: any[][] = [];
   const addRow = (data: any[], style?: string) => {
+    void style; // Explicitly indicate we're not using this parameter yet
     excelData.push(data);
   };
 

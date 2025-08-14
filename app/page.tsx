@@ -19,7 +19,7 @@ import {
 // Note: BudgetData type is used via hook return types
 import { exportBudgetData, importBudgetData } from '@/lib/storage';
 import { exportBudgetToPDF } from '@/lib/pdfExport';
-import { exportBudgetToCSV, exportBudgetToExcel } from '@/lib/csvExport';
+import { exportBudgetToExcel } from '@/lib/csvExport';
 import { CostSection } from '@/components/CostSection';
 import { useBudgetData } from '@/hooks/useBudgetData';
 import { useBudgetCalculations } from '@/hooks/useBudgetCalculations';
@@ -34,7 +34,6 @@ export default function Home() {
     budgetData,
     updateBudgetData,
     resetBudgetData,
-    isClient: _isClient, // Available but not used in this component
     // Startup fees
     addStartupFee,
     updateStartupFee,
@@ -112,17 +111,6 @@ export default function Home() {
     });
   };
 
-  const handleCSVExport = () => {
-    exportBudgetToCSV(budgetData, {
-      totalStartupFees,
-      totalVisitRevenue,
-      totalCustomRevenue,
-      totalPersonnelReimbursements,
-      subtotal,
-      overheadAmount,
-      totalRevenue,
-    });
-  };
 
   const handleExcelExport = async () => {
     await exportBudgetToExcel(budgetData, {

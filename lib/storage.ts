@@ -135,7 +135,7 @@ export const loadBudgetData = (): { data: BudgetData; error?: StorageError } => 
         try {
           parsedData = JSON.parse(backup);
           console.warn('Loaded from backup due to corrupted main data');
-        } catch (_backupError) {
+        } catch {
           return { 
             data: defaultBudgetData, 
             error: { 
@@ -183,18 +183,6 @@ export const loadBudgetData = (): { data: BudgetData; error?: StorageError } => 
   }
 };
 
-const checkStorageQuota = (): Promise<boolean> => {
-  if (typeof navigator === 'undefined' || !navigator.storage || !navigator.storage.estimate) {
-    return Promise.resolve(true); // Can't check, assume it's fine
-  }
-  
-  return navigator.storage.estimate().then(estimate => {
-    const usedSpace = estimate.usage || 0;
-    const totalSpace = estimate.quota || 0;
-    
-    return usedSpace < totalSpace * 0.8; // Use less than 80% of available space
-  }).catch(() => true); // If estimate fails, assume it's fine
-};
 
 export const saveBudgetData = (data: BudgetData): { success: boolean; error?: StorageError } => {
   if (typeof window === 'undefined') return { success: false, error: { type: 'UNKNOWN', message: 'Not in browser environment' } };
@@ -246,7 +234,7 @@ export const saveBudgetData = (data: BudgetData): { success: boolean; error?: St
         localStorage.removeItem(BACKUP_KEY);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         return { success: true };
-      } catch (_retryError) {
+      } catch {
         return { 
           success: false, 
           error: { 

@@ -40,6 +40,7 @@ export const TemplatesModal: React.FC<TemplatesModalProps> = ({
     if (!newTemplateName.trim()) return;
 
     const { studyInfo, ...templateData } = currentBudgetData;
+    void studyInfo; // Explicitly indicate we're discarding this value
     
     saveTemplate({
       name: newTemplateName,

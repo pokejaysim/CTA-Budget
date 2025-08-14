@@ -28,7 +28,6 @@ export default function Home() {
     budgetData,
     updateBudgetData,
     resetBudgetData,
-    isClient: _isClient, // Available but not used in this component
     // Startup fees
     addStartupFee,
     updateStartupFee,

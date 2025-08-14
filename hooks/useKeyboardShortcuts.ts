@@ -22,7 +22,7 @@ export const useKeyboardShortcuts = (shortcuts: KeyboardShortcuts) => {
     }
 
     // Check for modifier keys (Ctrl/Cmd)
-    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const ctrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
 
     if (ctrlOrCmd) {
@@ -80,7 +80,7 @@ export const useKeyboardShortcuts = (shortcuts: KeyboardShortcuts) => {
 
   // Return the shortcuts for display purposes
   const getShortcutText = useCallback(() => {
-    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const modifier = isMac ? '⌘' : 'Ctrl';
     
     return {
