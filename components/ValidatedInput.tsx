@@ -37,8 +37,13 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
   const isValid = validation && validation.isValid;
 
   useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
+    // For number inputs, show empty string when value is 0
+    if (type === 'number' && value === 0) {
+      setLocalValue('');
+    } else {
+      setLocalValue(value);
+    }
+  }, [value, type]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
@@ -51,7 +56,7 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
     
     // Set new timer for debounced validation
     const timer = setTimeout(() => {
-      const valueForValidation = type === 'number' ? Number(rawValue) : rawValue;
+      const valueForValidation = type === 'number' ? (rawValue === '' ? 0 : Number(rawValue)) : rawValue;
       validateField(fieldName, valueForValidation, schema);
       onChange(valueForValidation);
     }, debounceMs);
@@ -64,7 +69,7 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
     if (validationTimer) {
       clearTimeout(validationTimer);
     }
-    const valueForValidation = type === 'number' ? Number(localValue) : localValue;
+    const valueForValidation = type === 'number' ? (localValue === '' ? 0 : Number(localValue)) : localValue;
     validateField(fieldName, valueForValidation, schema);
     onChange(valueForValidation);
   };
