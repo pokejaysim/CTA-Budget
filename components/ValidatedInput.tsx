@@ -46,7 +46,13 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
   }, [value, type]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
+    let rawValue = e.target.value;
+    
+    // For number inputs, strip leading zeros except for decimal numbers
+    if (type === 'number' && rawValue.length > 1 && rawValue.startsWith('0') && !rawValue.startsWith('0.')) {
+      rawValue = rawValue.replace(/^0+/, '') || '0';
+    }
+    
     setLocalValue(rawValue);
     
     // Clear previous timer
@@ -98,7 +104,16 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
           value={localValue}
           onChange={handleChange}
           onBlur={handleBlur}
-          onFocus={onFocus}
+          onFocus={(e) => {
+            // Auto-select all text for number inputs
+            if (type === 'number') {
+              e.target.select();
+            }
+            // Call custom onFocus if provided
+            if (onFocus) {
+              onFocus(e);
+            }
+          }}
           className={inputClasses}
         />
         
